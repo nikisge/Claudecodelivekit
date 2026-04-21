@@ -1,0 +1,20 @@
+port: 7990
+bind_addresses:
+  - ""
+
+rtc:
+  tcp_port: 7991
+  port_range_start: 51000
+  port_range_end: 51060
+  use_external_ip: false
+  node_ip: 127.0.0.1
+
+redis:
+  address: redis:6379
+
+logging:
+  level: info
+  pion_level: warn
+
+turn:
+  enabled: false

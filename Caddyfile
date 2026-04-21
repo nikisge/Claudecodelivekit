@@ -1,0 +1,15 @@
+{
+	email {$CADDY_EMAIL}
+}
+
+# Frontend (Agent-Auswahl, Outbound-Formular)
+{$APP_DOMAIN} {
+	reverse_proxy frontend:3000
+	encode gzip
+}
+
+# LiveKit WebSocket-Endpoint für Browser-Clients
+{$LIVEKIT_DOMAIN} {
+	reverse_proxy livekit-server:7880
+	encode gzip
+}

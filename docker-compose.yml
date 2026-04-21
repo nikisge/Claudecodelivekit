@@ -1,0 +1,114 @@
+# Produktives Setup für VPS-Deployment (z. B. Hostinger).
+# Umfasst: Caddy (Auto-TLS) + LiveKit-Server + LiveKit-SIP + Redis + alle drei Agents + Frontend.
+#
+# Voraussetzungen auf dem VPS:
+#   - Docker + Docker Compose installiert
+#   - DNS-A-Records für ${APP_DOMAIN} und ${LIVEKIT_DOMAIN} auf VPS-IP zeigen
+#   - Firewall offen: 80/443 TCP, 7881 TCP, 50000–50060 UDP, 5060 UDP+TCP, 10000–20000 UDP
+#   - .env-Datei mit allen Keys gefüllt (siehe .env.example)
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN}
+      LIVEKIT_DOMAIN: ${LIVEKIT_DOMAIN}
+      CADDY_EMAIL: ${CADDY_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  livekit-server:
+    image: livekit/livekit-server:latest
+    command: --config /etc/livekit.yaml
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}"
+    network_mode: host
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml:ro
+
+  livekit-sip:
+    image: livekit/sip:latest
+    restart: unless-stopped
+    depends_on:
+      - livekit-server
+      - redis
+    network_mode: host
+    environment:
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
+      LIVEKIT_URL: ws://localhost:7880
+    volumes:
+      - ./livekit-sip.yaml:/etc/sip.yaml:ro
+    command: --config /etc/sip.yaml
+
+  agent-simple-latency:
+    build:
+      context: ./agents/01-simple-latency
+    restart: unless-stopped
+    depends_on:
+      - livekit-server
+    env_file: .env
+    environment:
+      LIVEKIT_URL: ws://livekit-server:7880
+      AGENT_NAME: simple-latency
+
+  agent-appointment-booking:
+    build:
+      context: ./agents/02-appointment-booking
+    restart: unless-stopped
+    depends_on:
+      - livekit-server
+    env_file: .env
+    environment:
+      LIVEKIT_URL: ws://livekit-server:7880
+      AGENT_NAME: appointment-booking
+    volumes:
+      # Service-Account-JSON vom Host read-only in Container
+      - ${GOOGLE_SERVICE_ACCOUNT_PATH}:/secrets/gcp-sa.json:ro
+
+  agent-outbound-telephony:
+    build:
+      context: ./agents/03-outbound-telephony
+    restart: unless-stopped
+    depends_on:
+      - livekit-server
+    env_file: .env
+    environment:
+      LIVEKIT_URL: ws://livekit-server:7880
+      AGENT_NAME: outbound-telephony
+
+  frontend:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - livekit-server
+    env_file: .env
+    environment:
+      # Browser verbindet über TLS-Subdomain, nicht über interne Service-DNS
+      NEXT_PUBLIC_LIVEKIT_URL: wss://${LIVEKIT_DOMAIN}
+      # Backend-seitige Operationen (Token-Issuing, Dispatch) via interne DNS
+      LIVEKIT_URL: ws://livekit-server:7880
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,104 @@
+# Lokales Setup für MacBook — On-Demand-Agent-Architektur.
+#
+# "Immer-an"-Services (Infrastructure):  docker compose up -d
+#   → LiveKit-Server, Redis, Frontend
+#   → Agents werden NICHT automatisch gestartet.
+#
+# Agents werden vom Frontend auf Knopfdruck gestartet/gestoppt
+# (Docker-Socket ist ins Frontend gemountet, siehe api/agent/*).
+#
+# Manuell starten möglich:
+#   docker compose --profile agent1 up -d   # Agent 1 starten
+#   docker compose --profile agent2 up -d   # Agent 2 starten
+#   docker compose --profile agent3 up -d   # Agent 3 starten
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: voice-redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  livekit-server:
+    image: livekit/livekit-server:latest
+    container_name: voice-livekit
+    command: --config /etc/livekit.yaml
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}"
+    ports:
+      - "7990:7990"
+      - "7991:7991"
+      - "51000-51060:51000-51060/udp"
+    volumes:
+      - ./livekit.local.yaml:/etc/livekit.yaml:ro
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: voice-frontend
+    restart: unless-stopped
+    depends_on:
+      - livekit-server
+    environment:
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
+      LIVEKIT_URL: ws://livekit-server:7990
+      NEXT_PUBLIC_LIVEKIT_URL: ws://localhost:7990
+    ports:
+      - "3000:3000"
+    volumes:
+      # Socket-Mount erlaubt dem Frontend-Server (nicht Browser!) Container zu steuern
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  agent-simple-latency:
+    build:
+      context: ./agents/01-simple-latency
+    image: voice-agent-simple-latency
+    container_name: voice-agent-1
+    profiles: ["agent1", "all-agents"]
+    restart: "no"
+    depends_on:
+      - livekit-server
+    env_file: .env
+    environment:
+      LIVEKIT_URL: ws://livekit-server:7990
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/gcp-sa.json
+    volumes:
+      - ./secrets/gcp-sa.json:/secrets/gcp-sa.json:ro
+
+  agent-appointment-booking:
+    build:
+      context: ./agents/02-appointment-booking
+    image: voice-agent-appointment-booking
+    container_name: voice-agent-2
+    profiles: ["agent2", "all-agents"]
+    restart: "no"
+    depends_on:
+      - livekit-server
+    env_file: .env
+    environment:
+      LIVEKIT_URL: ws://livekit-server:7990
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/gcp-sa.json
+      GOOGLE_SERVICE_ACCOUNT_PATH: /secrets/gcp-sa.json
+    volumes:
+      - ./secrets/gcp-sa.json:/secrets/gcp-sa.json:ro
+
+  agent-outbound-telephony:
+    build:
+      context: ./agents/03-outbound-telephony
+    image: voice-agent-outbound-telephony
+    container_name: voice-agent-3
+    profiles: ["agent3", "all-agents"]
+    restart: "no"
+    depends_on:
+      - livekit-server
+    env_file: .env
+    environment:
+      LIVEKIT_URL: ws://livekit-server:7990
