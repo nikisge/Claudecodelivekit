@@ -1,72 +1,82 @@
 # Credentials einrichten — Schritt für Schritt
 
-Dieser Leitfaden zeigt, welche Accounts/Keys du brauchst und wie du sie DSGVO-konform konfigurierst. Reihenfolge ist so gewählt, dass du nach jedem Abschnitt den zugehörigen Agent testen kannst.
+Alle Provider-Accounts + Keys für die drei Agents. Reihenfolge so gewählt, dass du nach jedem Abschnitt testen kannst.
 
-Kurzfassung:
+## Was brauchst du wofür?
 
-| Agent | Brauchst du | Abschnitt |
+| Agent | Services |
+|---|---|
+| **01 Simple Latency** | Google Cloud (Vertex AI) · Deepgram · Cartesia |
+| **02 Termin-Assistent** | Azure OpenAI · Deepgram · ElevenLabs · Google Calendar |
+| **03 Outbound-Telephony** | Azure OpenAI · Deepgram · ElevenLabs · Twilio (nur auf VPS) |
+
+## Quick-Links
+
+| Provider | Dashboard | Was abholen |
 |---|---|---|
-| 01 Simple Latency | Google Cloud, Deepgram, Cartesia | 1, 3, 4 |
-| 02 Appointment Booking | Azure OpenAI, Deepgram, ElevenLabs, Google Calendar | 2, 3, 5, 6 |
-| 03 Outbound Telephony | Azure OpenAI, Deepgram, ElevenLabs, Twilio, VPS | 2, 3, 5, 7 |
+| Google Cloud | [console.cloud.google.com](https://console.cloud.google.com/) | Project-ID, Service-Account-JSON |
+| Azure OpenAI | [portal.azure.com](https://portal.azure.com/#create/Microsoft.CognitiveServicesOpenAI) | Endpoint + API-Key |
+| Azure AI Foundry | [ai.azure.com](https://ai.azure.com/) | Modell-Deployment |
+| Deepgram | [console.deepgram.com](https://console.deepgram.com/) | API-Key + EU-Region im Projekt |
+| Cartesia | [play.cartesia.ai](https://play.cartesia.ai/) | API-Key + Voice-ID |
+| ElevenLabs | [elevenlabs.io/app](https://elevenlabs.io/app/settings/api-keys) | API-Key + Voice-ID |
+| Twilio | [console.twilio.com](https://console.twilio.com/) | Trunk + Nummer (nur VPS) |
 
-Alle Keys landen in der `.env` (aus `.env.example` kopieren: `cp .env.example .env`).
+`cp .env.example .env` und unten die Keys nacheinander eintragen.
 
 ---
 
-## 1. Google Cloud (Vertex AI / Gemini — für Agent 01)
+## 1. Google Cloud (Vertex AI + Calendar)
 
-Agent 01 nutzt Gemini über Vertex AI in der EU-Region. Du brauchst ein GCP-Projekt, ein Service-Account-JSON und drei aktivierte Sachen.
+Ein einziger Service Account für beides — Vertex AI (Agent 01) und Calendar (Agent 02).
 
 ### 1.1 Projekt + Service Account
+1. In [GCP Console](https://console.cloud.google.com/) Projekt anlegen. **Project-ID** notieren (die ID oben in der Projekt-Auswahl, nicht der Anzeigename).
+2. [IAM → Service Accounts → Create](https://console.cloud.google.com/iam-admin/serviceaccounts) → Name: `livekit-voice-agent`.
+3. Rolle: **Vertex AI User** (`roles/aiplatform.user`).
+4. Beim erstellten Service Account → Tab **Keys → Add Key → JSON** → Datei als `secrets/gcp-sa.json` speichern.
 
-1. In der [GCP-Console](https://console.cloud.google.com/) ein Projekt anlegen (oder vorhandenes nutzen). Notiere die **Project-ID** (nicht den Namen — die ID steht oben in der Projekt-Auswahl).
-2. Links im Menü → **IAM & Admin → Service Accounts** → **Create Service Account**. Name z.B. `livekit-voice-agent`.
-3. Rolle hinzufügen: **Vertex AI User** (`roles/aiplatform.user`). Für Agent 02 zusätzlich nichts — Calendar regelt sich separat (Abschnitt 6).
-4. Bei dem Service-Account → Tab **Keys** → **Add Key → Create new key → JSON**. Die Datei landet in deinen Downloads.
-5. Datei umbenennen zu `gcp-sa.json` und in `secrets/gcp-sa.json` im Repo-Root ablegen.
+### 1.2 APIs aktivieren (wichtig — sonst 403 CONSUMER_INVALID)
 
-### 1.2 Vertex AI API aktivieren
+- **Vertex AI API** aktivieren: https://console.cloud.google.com/apis/library/aiplatform.googleapis.com
+- **Google Calendar API** aktivieren: https://console.cloud.google.com/apis/library/calendar-json.googleapis.com
 
-Ohne das gibt's `403 PERMISSION_DENIED / CONSUMER_INVALID`, selbst mit gültigem Service Account:
+### 1.3 Billing verknüpfen (sonst 403 egal was)
 
-https://console.cloud.google.com/apis/library/aiplatform.googleapis.com
+https://console.cloud.google.com/billing/linkedaccount → Billing-Account zuordnen. Karte oder SEPA reicht.
 
-→ Dein Projekt oben auswählen → **Enable**.
+### 1.4 Kalender mit Service Account teilen (für Agent 02)
 
-### 1.3 Billing aktivieren
+1. Aus `secrets/gcp-sa.json` das Feld `client_email` kopieren (z.B. `livekit-voice-agent@<project-id>.iam.gserviceaccount.com`).
+2. [calendar.google.com](https://calendar.google.com/) öffnen → gewünschter Kalender → Drei-Punkte-Menü → **Einstellungen und Freigabe**.
+3. **Für bestimmte Personen oder Gruppen freigeben → Hinzufügen** → `client_email` einfügen → Berechtigung: **Änderungen an Terminen vornehmen**.
+4. **Kalender-ID** von der gleichen Seite kopieren (`primary` für deinen Hauptkalender, sonst `xxx@group.calendar.google.com`).
 
-Vertex AI ist nicht kostenlos und funktioniert ohne verknüpftes Rechnungskonto **gar nicht** (auch nicht im Free Tier):
-
-https://console.cloud.google.com/billing/linkedaccount
-
-→ Projekt wählen → Billing-Account verknüpfen. Eine Karte oder SEPA-Lastschrift reicht.
-
-### 1.4 In `.env` eintragen
+### 1.5 `.env`
 
 ```env
 GOOGLE_APPLICATION_CREDENTIALS=/secrets/gcp-sa.json
 GOOGLE_CLOUD_PROJECT=deine-project-id
 GOOGLE_CLOUD_LOCATION=europe-west4
 GEMINI_MODEL=gemini-2.5-flash-lite
+GOOGLE_SERVICE_ACCOUNT_PATH=./secrets/gcp-sa.json
+GOOGLE_CALENDAR_ID=primary
 ```
 
-**Wichtig:** `GOOGLE_CLOUD_PROJECT` muss die **Project-ID** sein (z.B. `mein-projekt-123456`), nicht der Anzeigename.
+> Details zu Calendar: [docs/google-calendar-setup.md](./google-calendar-setup.md)
 
 ---
 
-## 2. Azure OpenAI (für Agent 02 + 03)
+## 2. Azure OpenAI (Agent 02 + 03)
 
-DSGVO-wichtig: **EU Data Zone Standard** deployen, nicht Global Standard.
+**DSGVO:** zwingend "EU Data Zone Standard" deployen, **nicht** "Global Standard".
 
-1. Im [Azure Portal](https://portal.azure.com/) eine **Azure OpenAI Resource** anlegen. Region: `swedencentral`.
-2. Im [Azure AI Foundry](https://ai.azure.com/) → Deployments → **Create** → Modell `gpt-4.1-mini` → Deployment-Type: **EU Data Zone Standard** (nicht Global!).
-3. Aus der Resource:
-   - **Keys and Endpoint** → Key 1 → `AZURE_OPENAI_API_KEY`
-   - Endpoint-URL (https://…openai.azure.com) → `AZURE_OPENAI_ENDPOINT`
+1. Resource anlegen: https://portal.azure.com/#create/Microsoft.CognitiveServicesOpenAI → Region `swedencentral`.
+2. In [Azure AI Foundry](https://ai.azure.com/) → **Deployments → Create** → Modell `gpt-4.1-mini` → Deployment-Typ: **EU Data Zone Standard**.
+3. In der Azure-Resource → **Keys and Endpoint** → Key 1 + Endpoint-URL abholen.
 
 ```env
-AZURE_OPENAI_API_KEY=<dein-key>
+AZURE_OPENAI_API_KEY=<key>
 AZURE_OPENAI_ENDPOINT=https://<deine-resource>.openai.azure.com
 AZURE_OPENAI_API_VERSION=2024-12-01-preview
 AZURE_OPENAI_DEPLOYMENT=gpt-4.1-mini
@@ -74,110 +84,107 @@ AZURE_OPENAI_DEPLOYMENT=gpt-4.1-mini
 
 ---
 
-## 3. Deepgram (STT — für alle Agents)
+## 3. Deepgram (STT — alle Agents)
 
-DSGVO: EU-Residency wird nicht über eine separate URL gemacht, sondern im Dashboard pro Projekt.
+**DSGVO:** EU-Residency wird **nicht** per URL gesetzt (ein `api.eu.deepgram.com`-Hostname existiert nicht) — sondern im Dashboard pro Projekt.
 
-1. Account auf [deepgram.com](https://deepgram.com) anlegen.
-2. Neues Projekt → **Settings → Region: EU** (Frankfurt). Diesen Schritt **nicht vergessen**, sonst landen Audiodaten in den USA.
-3. **API Keys → Create a New API Key** → Rolle "Member" reicht.
+1. Account: https://deepgram.com/
+2. Projekt-Settings: https://console.deepgram.com/ → **Settings → Region: EU**.
+3. **API Keys → Create** (Rolle "Member" reicht).
 
 ```env
-DEEPGRAM_API_KEY=<dein-key>
+DEEPGRAM_API_KEY=<key>
 DEEPGRAM_BASE_URL=https://api.deepgram.com/v1/listen
 ```
 
-**Nicht** `api.eu.deepgram.com` eintragen — diesen Endpoint gibt es nicht. Der globale Endpoint routet automatisch zu EU, wenn dein Projekt EU-Region ist.
-
 ---
 
-## 4. Cartesia (TTS — für Agent 01)
+## 4. Cartesia (TTS — Agent 01)
 
-1. Account auf [cartesia.ai](https://cartesia.ai) anlegen.
-2. **API Keys → Create** → kopieren.
-3. Für DSGVO: Im Account-Setting **Zero-Retention** aktivieren und den DPA unterzeichnen (Support anschreiben, dauert 1–2 Tage).
-4. Unter [play.cartesia.ai/voices](https://play.cartesia.ai/voices) eine **deutsche Stimme** aus dem `sonic-multilingual`-Katalog suchen (nach "German" filtern, Probe anhören). Voice-ID kopieren.
+1. Account: https://cartesia.ai/
+2. [play.cartesia.ai](https://play.cartesia.ai/) → **API Keys → Create**.
+3. **DSGVO:** Zero-Retention im Account-Setting aktivieren + DPA unterzeichnen (Support anschreiben).
+4. Voice suchen: https://play.cartesia.ai/voices → nach "German" filtern, Probe anhören → **Voice-ID** kopieren (wichtig: deutsche Stimme, sonst spricht der Agent mit US-Akzent).
 
 ```env
-CARTESIA_API_KEY=<dein-key>
-CARTESIA_VOICE_ID=<voice-id-aus-library>
+CARTESIA_API_KEY=<key>
+CARTESIA_VOICE_ID=<voice-id>
 ```
 
-**Achtung:** Wenn du eine englische Stimme nimmst, spricht der Agent deutschen Text mit US-Akzent — prüfe die Voice-ID vor dem Einchecken.
-
 ---
 
-## 5. ElevenLabs (TTS — für Agent 02 + 03)
+## 5. ElevenLabs (TTS — Agent 02 + 03)
 
-Default-Stimme für dieses Repo ist **"Johanna"** (deutsch).
+Default-Stimme: **"Johanna"** (deutsch).
 
-1. Account auf [elevenlabs.io](https://elevenlabs.io) — DSGVO: für echte Produktion braucht's den **Enterprise Plan mit EU-Residency**, andernfalls Data-Transfer in US.
-2. In **Voice Library** nach "Johanna" suchen (oder andere deutsche Stimme) → "Add to VoiceLab" → Voice-ID kopieren.
-3. **Profile Settings → API Keys**.
+1. Account: https://elevenlabs.io/ — **DSGVO:** Enterprise-Plan mit EU-Residency (sonst Data-Transfer in US).
+2. API-Key: https://elevenlabs.io/app/settings/api-keys
+3. Voice Library → "Johanna" suchen → **Add to VoiceLab** → Voice-ID kopieren.
 
 ```env
-ELEVENLABS_API_KEY=<dein-key>
+ELEVENLABS_API_KEY=<key>
 ELEVEN_VOICE_ID=<voice-id>
 ```
 
 ---
 
-## 6. Google Calendar (für Agent 02)
+## 6. Twilio (Agent 03 — nur auf VPS)
 
-Der Termin-Assistent schreibt in einen echten Google Calendar. Das läuft über den **gleichen Service Account** wie Vertex AI (Abschnitt 1) — du musst ihm nur Zugriff auf den Kalender geben.
+Lokal nicht sinnvoll testbar (Twilio muss per SIP zum öffentlich erreichbaren LiveKit verbinden). Kurzfassung:
 
-1. Die **Service-Account-E-Mail** kopieren (sieht aus wie `livekit-voice-agent@<project-id>.iam.gserviceaccount.com`). Steht im `gcp-sa.json` unter `client_email`, oder in der GCP-Console bei dem Service Account.
-2. Google Calendar öffnen ([calendar.google.com](https://calendar.google.com)).
-3. Links bei deinem gewünschten Kalender → Drei-Punkte-Menü → **Settings and sharing**.
-4. Scroll zu **Share with specific people or groups → Add people** → Service-Account-E-Mail einfügen → Berechtigung auf **Make changes to events** setzen.
-5. **Calendar ID** kopieren (weiter unten auf der gleichen Seite, z.B. `dein-kalender@group.calendar.google.com`). Für deinen privaten Kalender reicht `primary`.
+1. [console.twilio.com](https://console.twilio.com/) → Account anlegen, Zahlungsmethode hinterlegen (kein Free-Trial für SIP).
+2. **Region auf EU stellen** für DSGVO: Console-Header → Region-Dropdown → `eu1` (Dublin) oder `de1` (Frankfurt). [Twilio-Regions-Doku](https://www.twilio.com/docs/global-infrastructure)
+3. **Phone Numbers → Buy a Number** → Voice-Capability ✔, Region DE/AT/CH.
+4. **Elastic SIP Trunking → Trunks → Create** → `livekit-tutorial-trunk`.
+   - **Termination URI** (z.B. `voiceagents.pstn.twilio.com`) → `TWILIO_SIP_TRUNK_URI`
+   - **Credential List** (Username/Passwort) anlegen → **das** sind `TWILIO_ACCOUNT_SID` + `TWILIO_AUTH_TOKEN` (nicht die Account-Top-Level-Tokens!).
+   - **Numbers** → gekaufte Nummer zuordnen.
+5. Auf dem VPS: `python3 scripts/setup-sip.py` → liefert `LIVEKIT_OUTBOUND_TRUNK_ID` zurück, in `.env` eintragen.
+6. **DPA** unterzeichnen: Console → Privacy & Compliance.
 
 ```env
-GOOGLE_SERVICE_ACCOUNT_PATH=./secrets/gcp-sa.json
-GOOGLE_CALENDAR_ID=primary
+TWILIO_SIP_TRUNK_URI=sip:<trunk>.pstn.twilio.com
+TWILIO_ACCOUNT_SID=<trunk-credential-user>
+TWILIO_AUTH_TOKEN=<trunk-credential-pw>
+TWILIO_PHONE_NUMBER=+49...
+LIVEKIT_OUTBOUND_TRUNK_ID=ST_xxx
 ```
 
-**Häufiger Fehler:** Agent bekommt `403` auf Calendar-API → Service-Account-E-Mail nicht (oder mit falscher Berechtigung) geteilt.
+> **Vollständiges Setup inkl. Firewall/NAT-Troubleshooting:** [docs/twilio-setup.md](./twilio-setup.md)
 
 ---
 
-## 7. Twilio SIP (Agent 03 — nur VPS)
-
-Lokal nicht sinnvoll testbar. Für das VPS-Setup siehe `docs/twilio-setup.md` und `docs/vps-deployment.md`.
-
----
-
-## 8. LiveKit-Keys (lokal generieren)
-
-Keine externe Registrierung nötig — Keys werden lokal erzeugt:
+## 7. LiveKit-Keys (lokal generieren)
 
 ```bash
 ./scripts/generate-keys.sh
 ```
 
-Das Skript schreibt `LIVEKIT_API_KEY` und `LIVEKIT_API_SECRET` in deine `.env`.
+Schreibt `LIVEKIT_API_KEY` und `LIVEKIT_API_SECRET` automatisch in deine `.env`.
 
 ---
 
 ## Sanity-Check vor dem ersten Start
 
-Minimal für Agent 01 gesetzt?
+Minimum für Agent 01 gesetzt?
 
 ```bash
-grep -E '^(LIVEKIT_API_KEY|LIVEKIT_API_SECRET|DEEPGRAM_API_KEY|CARTESIA_API_KEY|CARTESIA_VOICE_ID|GOOGLE_CLOUD_PROJECT)=' .env | awk -F= '{print $1, ($2=="" ? "LEER!" : "ok")}'
+grep -E '^(LIVEKIT_API_KEY|LIVEKIT_API_SECRET|DEEPGRAM_API_KEY|CARTESIA_API_KEY|CARTESIA_VOICE_ID|GOOGLE_CLOUD_PROJECT)=' .env \
+  | awk -F= '{print $1, ($2=="" ? "LEER!" : "ok")}'
 ```
 
-Alles `ok`? Dann:
+Alles `ok` und `GOOGLE_CLOUD_PROJECT` ≠ `mein-gcp-projekt`? Dann los:
 
 ```bash
-./start.sh setup   # einmalig, baut Images + legt Container an (~5 Min)
-./start.sh         # startet LiveKit + Frontend
+./start.sh setup   # einmalig: Images bauen + Container anlegen (~5 Min)
+./start.sh         # Infra starten
 ```
 
-Browser: http://localhost:3000 → Simple-Latency → "Start" → "Öffnen" → reden.
+→ http://localhost:3000 → Agent auswählen → "Start" → "Öffnen" → reden.
 
-## Die drei häufigsten Probleme beim ersten Start
+## Häufigste Startprobleme
 
-1. **Alle Kacheln zeigen "missing"** → `./start.sh setup` wurde übersprungen. Einmal nachholen.
-2. **Kachel grün, aber Agent antwortet nicht** → fast immer GCP: Vertex AI API nicht aktiviert, Billing fehlt, oder `GOOGLE_CLOUD_PROJECT` ist noch auf `mein-gcp-projekt`. Abschnitt 1.2/1.3/1.4 durchgehen.
-3. **"Deepgram 404"** → `DEEPGRAM_BASE_URL` ist falsch. Muss `https://api.deepgram.com/v1/listen` sein, nicht `api.eu.deepgram.com` (existiert nicht).
+1. **Alle Kacheln "missing"** → `./start.sh setup` übersprungen.
+2. **Kachel grün, keine Antwort** → fast immer GCP: Vertex AI API nicht aktiv, Billing fehlt, oder Project-ID steht noch auf `mein-gcp-projekt`.
+3. **Deepgram 404** → `DEEPGRAM_BASE_URL` ist falsch. Korrekt: `https://api.deepgram.com/v1/listen`.
+4. **Agent 02 kann keinen Termin buchen (403)** → Service-Account-E-Mail nicht im Kalender freigegeben, oder Calendar API nicht aktiviert.
