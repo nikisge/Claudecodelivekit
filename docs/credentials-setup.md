@@ -30,6 +30,8 @@ Alle Provider-Accounts + Keys für die drei Agents. Reihenfolge so gewählt, das
 
 Ein einziger Service Account für beides — Vertex AI (Agent 01) und Calendar (Agent 02).
 
+> **Warum Service Account statt OAuth2 (wie in n8n)?** Der Agent läuft in einem Docker-Container ohne Browser, ein OAuth2-Redirect-Flow wäre umständlich. Außerdem zwingt Google OAuth2-Apps mit Calendar-Scope in den Testing-Mode (100 User max) oder eine wochenlange App-Verification. Für den 1-Kalender-Fall ist SA deutlich einfacher. Multi-Tenant-Szenarien (mehrere Kunden mit eigenem Kalender) wären ein Grund, OAuth2 zu nutzen — für dieses Tutorial nicht relevant.
+
 ### 1.1 Projekt + Service Account
 1. In [GCP Console](https://console.cloud.google.com/) Projekt anlegen. **Project-ID** notieren (die ID oben in der Projekt-Auswahl, nicht der Anzeigename).
 2. [IAM → Service Accounts → Create](https://console.cloud.google.com/iam-admin/serviceaccounts) → Name: `livekit-voice-agent`.
