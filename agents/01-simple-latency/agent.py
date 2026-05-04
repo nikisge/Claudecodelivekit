@@ -1,23 +1,21 @@
 """
-Agent 01 — Simple Latency
+Agent 01 — Simple Latency (Native Audio)
 
-Minimale STT → LLM → TTS-Pipeline. Zeigt das Grundprinzip eines LiveKit Voice-Agents
-in möglichst wenig Code.
+Speech-to-Speech-Pipeline mit Gemini Live API: Audio direkt rein, Audio direkt
+raus. Kein separates STT/TTS — niedrigere Latenz und natürlicheres Turn-Taking
+als die klassische STT→LLM→TTS-Pipeline.
 
-Provider (alle EU-Region / DSGVO-konform):
-  STT: Azure Speech (EU-Region)
-  LLM: Google Gemini 2.5 Flash Lite via Vertex AI (EU-Region)
-  TTS: Azure Speech Neural Voice (EU-Region)
-  VAD: Silero (lokal, keine externe API)
-  Turn Detection: LiveKit Multilingual Model (lokal)
+Provider (DSGVO-konform):
+  Realtime LLM: Gemini 2.5 Flash Native Audio via Vertex AI (europe-west4)
+
+VAD und Turn-Detection übernimmt das Live-Modell selbst — kein Silero-Plugin.
 """
 
 import os
 from dotenv import find_dotenv, load_dotenv
 
 from livekit.agents import Agent, AgentSession, JobContext, WorkerOptions, cli
-from livekit.plugins import azure, google, silero
-from livekit.plugins.turn_detector.multilingual import MultilingualModel
+from livekit.plugins import google
 
 load_dotenv(find_dotenv(usecwd=True))
 
@@ -29,7 +27,8 @@ class SimpleLatencyAgent(Agent):
                 "Du bist ein freundlicher, hilfsbereiter Voice-Assistent. "
                 "Antworte immer auf Deutsch, in kurzen und natürlichen Sätzen. "
                 "Du bist Teil eines Tutorial-Videos über LiveKit — wenn jemand fragt was du bist, "
-                "erkläre kurz, dass du ein Demo-Agent bist, der die STT→LLM→TTS-Pipeline zeigt."
+                "erkläre kurz, dass du ein Demo-Agent bist, der die Speech-to-Speech-Pipeline "
+                "mit der Gemini Live API zeigt."
             ),
         )
 
@@ -38,25 +37,14 @@ async def entrypoint(ctx: JobContext) -> None:
     await ctx.connect()
 
     session = AgentSession(
-        vad=silero.VAD.load(),
-        stt=azure.STT(
-            speech_key=os.getenv("AZURE_SPEECH_KEY"),
-            speech_region=os.getenv("AZURE_SPEECH_REGION", "swedencentral"),
-            language=os.getenv("AZURE_SPEECH_LANGUAGE", "de-DE"),
-        ),
-        llm=google.LLM(
-            model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite"),
+        llm=google.beta.realtime.RealtimeModel(
+            model=os.getenv("GEMINI_LIVE_MODEL", "gemini-live-2.5-flash-native-audio"),
             vertexai=True,
             project=os.getenv("GOOGLE_CLOUD_PROJECT"),
             location=os.getenv("GOOGLE_CLOUD_LOCATION", "europe-west4"),
+            voice=os.getenv("GEMINI_LIVE_VOICE", "Aoede"),
+            language=os.getenv("GEMINI_LIVE_LANGUAGE", "de-DE"),
         ),
-        tts=azure.TTS(
-            speech_key=os.getenv("AZURE_SPEECH_KEY"),
-            speech_region=os.getenv("AZURE_SPEECH_REGION", "swedencentral"),
-            voice=os.getenv("AZURE_SPEECH_VOICE", "de-DE-SeraphinaMultilingualNeural"),
-            language=os.getenv("AZURE_SPEECH_LANGUAGE", "de-DE"),
-        ),
-        turn_detection=MultilingualModel(),
     )
 
     await session.start(agent=SimpleLatencyAgent(), room=ctx.room)

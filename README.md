@@ -12,6 +12,31 @@ Begleit-Repo zum YouTube-Tutorial. Das Projekt zeigt drei deutsche Voice-AI-Agen
 
 Die lokale Docker-Variante startet nur die Infrastruktur dauerhaft. Agent-Container werden im Browser pro Kachel gestartet und gestoppt. Auf dem VPS laufen alle Services dauerhaft per Docker Compose.
 
+## VPS Quick-Setup (1 Befehl)
+
+Auf einem **leeren Ubuntu/Debian-VPS** (ohne Docker etc.) reicht ein Befehl, um alles zu installieren:
+
+```bash
+git clone https://github.com/nikisge/Claudecodelivekit.git
+cd Claudecodelivekit
+sudo ./scripts/install-vps.sh
+```
+
+Das installiert Docker + Compose-Plugin, setzt die Firewall-Regeln, erzeugt die LiveKit-Keys und legt `secrets/` an. Danach nur noch:
+
+1. **`.env` editieren** und mindestens diese Werte setzen:
+   - `GOOGLE_CLOUD_PROJECT` (Vertex AI Project-ID)
+   - `AZURE_SPEECH_KEY` (Azure Speech Resource Key)
+   - `APP_DOMAIN`, `LIVEKIT_DOMAIN`, `CADDY_EMAIL`, `LIVEKIT_URL` (für TLS-Produktion)
+2. **Service-Account-JSON nach `secrets/gcp-sa.json` legen**
+3. **Agents bauen + starten**:
+   ```bash
+   ./start.sh setup            # Agent-Images bauen (~5 Min, einmalig)
+   docker compose up -d --build # Produktion mit Caddy + TLS
+   ```
+
+Provider-Setup-Details siehe `docs/credentials-setup.md`.
+
 ## Lokal starten
 
 Voraussetzungen: Docker Desktop, ein gefülltes `.env`, Provider-Keys und für Agent 1/2 die Google-Service-Account-Datei unter `./secrets/gcp-sa.json`.
