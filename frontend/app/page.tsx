@@ -24,7 +24,7 @@ const AGENTS: AgentCardData[] = [
     title: 'Simple Latency',
     description:
       'Minimale STT→LLM→TTS-Pipeline. Zeigt das Grundprinzip eines Voice-Agents in ~80 Zeilen Code.',
-    stack: 'Gemini 2.5 Flash Lite · Deepgram · Cartesia',
+    stack: 'Gemini 2.5 Flash Lite · Deepgram EU · Azure Speech',
   },
   {
     key: 'appointment-booking',
@@ -33,7 +33,7 @@ const AGENTS: AgentCardData[] = [
     title: 'Termin-Assistent',
     description:
       'Bucht, verschiebt und sagt Termine in einem echten Google Kalender ab. Zeigt Multi-Turn-Tool-Calling.',
-    stack: 'Azure OpenAI GPT-4.1 mini · ElevenLabs Johanna',
+    stack: 'Azure OpenAI GPT-4.1 mini · Azure Speech',
   },
   {
     key: 'outbound-telephony',

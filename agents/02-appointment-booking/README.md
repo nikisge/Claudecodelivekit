@@ -43,5 +43,5 @@ uv run python agent.py dev
 ## DSGVO
 
 - **Azure OpenAI:** Deployment muss im Azure Portal als „EU Data Zone Standard" konfiguriert werden, nicht „Global Standard"
-- **ElevenLabs:** EU Residency (Enterprise), `enable_logging=False` im Plugin setzt Zero-Retention für dieses Projekt
+- **Azure Speech:** Speech-Resource in EU-Region für STT/TTS; ElevenLabs nur optional mit Enterprise EU Residency + Zero-Retention
 - **Google Calendar:** Daten liegen bei Google. Wenn dein Google Workspace in der EU registriert ist, greift die EU-Data-Residency von Google Workspace. Für volle Kontrolle → Nextcloud Calendar mit CalDAV (out of scope dieses Tutorials)

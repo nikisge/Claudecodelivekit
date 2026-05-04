@@ -6,9 +6,9 @@ als JSON-Metadata, qualifiziert den Lead in ~3 Min und pusht das Ergebnis per
 Data-Channel zurück an das Frontend (wo der Absender live sieht, was passiert).
 
 Provider (DSGVO-konform):
-  STT: Deepgram Nova-3 (EU)
+  STT: Azure Speech (EU-Region)
   LLM: Azure OpenAI GPT-4.1-mini (Sweden Central)
-  TTS: ElevenLabs Flash v2.5 „Johanna" (DE, enable_logging=False)
+  TTS: Azure Speech Neural Voice (EU-Region)
 
 Voraussetzung: LIVEKIT_OUTBOUND_TRUNK_ID ist gesetzt (über scripts/setup-sip.py einmalig erzeugt).
 """
@@ -29,7 +29,7 @@ from livekit.agents import (
     cli,
     function_tool,
 )
-from livekit.plugins import deepgram, elevenlabs, openai, silero
+from livekit.plugins import azure, openai, silero
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
 from prompts import LEAD_QUALIFIER_SYSTEM_PROMPT
@@ -102,10 +102,10 @@ async def entrypoint(ctx: JobContext) -> None:
 
     session = AgentSession(
         vad=silero.VAD.load(),
-        stt=deepgram.STT(
-            model="nova-3",
-            language="multi",
-            base_url=os.getenv("DEEPGRAM_BASE_URL", "https://api.eu.deepgram.com"),
+        stt=azure.STT(
+            speech_key=os.getenv("AZURE_SPEECH_KEY"),
+            speech_region=os.getenv("AZURE_SPEECH_REGION", "swedencentral"),
+            language=os.getenv("AZURE_SPEECH_LANGUAGE", "de-DE"),
         ),
         llm=openai.LLM.with_azure(
             model=os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4.1-mini"),
@@ -113,11 +113,11 @@ async def entrypoint(ctx: JobContext) -> None:
             api_key=os.getenv("AZURE_OPENAI_API_KEY"),
             api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2024-12-01-preview"),
         ),
-        tts=elevenlabs.TTS(
-            voice_id=os.getenv("ELEVEN_VOICE_ID"),
-            model="eleven_flash_v2_5",
-            language="de",
-            enable_logging=False,
+        tts=azure.TTS(
+            speech_key=os.getenv("AZURE_SPEECH_KEY"),
+            speech_region=os.getenv("AZURE_SPEECH_REGION", "swedencentral"),
+            voice=os.getenv("AZURE_SPEECH_VOICE", "de-DE-SeraphinaMultilingualNeural"),
+            language=os.getenv("AZURE_SPEECH_LANGUAGE", "de-DE"),
         ),
         turn_detection=MultilingualModel(),
     )

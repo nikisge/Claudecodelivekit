@@ -12,9 +12,8 @@ Agent 3 (Outbound) funktioniert lokal nur mit ngrok-Umweg — den Teil deployen 
 - API-Accounts bei:
   - Google Cloud (für Vertex AI + Calendar, Service Accounts)
   - Microsoft Azure (OpenAI, EU Data Zone)
-  - Deepgram (EU-Endpoint)
-  - Cartesia (Zero-Retention aktivieren)
-  - ElevenLabs (Voice „Johanna" in deinem Workspace)
+  - Azure Speech (EU-Region für STT/TTS)
+  - Deepgram (EU-Endpoint für Agent 01)
 
 ## Schritte
 
@@ -43,16 +42,17 @@ AZURE_OPENAI_API_KEY=...
 AZURE_OPENAI_ENDPOINT=https://dein-resource.openai.azure.com
 AZURE_OPENAI_DEPLOYMENT=gpt-4.1-mini
 
-# Deepgram (EU)
+# Azure Speech (EU)
+AZURE_SPEECH_KEY=...
+AZURE_SPEECH_REGION=swedencentral
+AZURE_SPEECH_LANGUAGE=de-DE
+AZURE_SPEECH_VOICE=de-DE-SeraphinaMultilingualNeural
+
+# Deepgram (EU, Agent 01)
 DEEPGRAM_API_KEY=...
-
-# Cartesia
-CARTESIA_API_KEY=...
-CARTESIA_VOICE_ID=<aus Voice Library kopiert, deutsche Stimme>
-
-# ElevenLabs
-ELEVENLABS_API_KEY=...
-ELEVEN_VOICE_ID=<Voice-ID von Johanna>
+DEEPGRAM_BASE_URL=https://api.eu.deepgram.com
+DEEPGRAM_MODEL=nova-3
+DEEPGRAM_LANGUAGE=de
 
 # Google Calendar (für Agent 02)
 GOOGLE_SERVICE_ACCOUNT_PATH=./secrets/gcp-sa.json
@@ -108,8 +108,10 @@ Im Browser auf **Termin-Assistent** klicken. Sprich: „Ich möchte am Freitag u
 
 **Agent joint den Room nicht** → `docker compose logs livekit-server` anschauen. Häufig: LIVEKIT_API_KEY stimmt zwischen Server und Agent nicht überein.
 
-**STT versteht nichts** → Deepgram-Key prüfen und `DEEPGRAM_BASE_URL=https://api.eu.deepgram.com` setzen. Sample-Rate des Browser-Mikrofons testen.
+**Agent 01 versteht nichts** → `DEEPGRAM_API_KEY` und `DEEPGRAM_BASE_URL=https://api.eu.deepgram.com` prüfen. Für Deutsch `DEEPGRAM_LANGUAGE=de` setzen.
 
-**Cartesia: „Voice not found"** → in der Cartesia-Konsole unter Voices eine deutsche Stimme auswählen, Voice-ID kopieren nach `CARTESIA_VOICE_ID`.
+**Agent 02/03 verstehen nichts** → `AZURE_SPEECH_KEY` und `AZURE_SPEECH_REGION` prüfen. Key und Region müssen zur gleichen Speech-Resource gehören.
+
+**TTS bleibt stumm** → `AZURE_SPEECH_VOICE` prüfen. Für Deutsch z. B. `de-DE-SeraphinaMultilingualNeural`, `de-DE-FlorianMultilingualNeural`, `de-DE-KatjaNeural`.
 
 **Azure: 401** → Deployment in Azure Portal muss genau so heißen wie `AZURE_OPENAI_DEPLOYMENT`. Prüfe außerdem `AZURE_OPENAI_API_VERSION`.

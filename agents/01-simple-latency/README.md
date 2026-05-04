@@ -3,7 +3,7 @@
 Minimaler Voice-Agent, der das Grundprinzip einer LiveKit-Pipeline zeigt:
 
 ```
-Mikrofon → Deepgram (STT) → Gemini 2.5 Flash Lite (LLM) → Cartesia (TTS) → Lautsprecher
+Mikrofon → Azure Speech (STT) → Azure OpenAI gpt-4.1-mini (LLM) → Azure Speech (TTS) → Lautsprecher
                                     │
                                     └── Silero VAD + Multilingual Turn Detection
 ```
@@ -27,16 +27,19 @@ Mikrofon → Deepgram (STT) → Gemini 2.5 Flash Lite (LLM) → Cartesia (TTS) �
 
 | Komponente | Gewählt | Grund |
 |---|---|---|
-| LLM | Gemini 2.5 Flash Lite (Vertex EU) | niedrigste First-Token-Latenz unter DSGVO-konformen Optionen |
-| STT | Deepgram Nova-3 (EU-Endpoint `api.eu.deepgram.com`) | schnellstes Streaming-STT mit guter DE-Erkennung |
-| TTS | Cartesia Sonic Multilingual | ~100ms First-Audio-Latenz, deutsche Stimmen verfügbar |
+| LLM | Azure OpenAI gpt-4.1-mini (EU Data Zone) | gleicher Provider wie STT/TTS — Zuschauer braucht nur **eine** Cloud |
+| STT | Azure Speech (EU-Region) | identische Resource wie TTS, nur ein Key |
+| TTS | Azure Speech Neural Voice | deutsche Stimmen, z. B. `de-DE-SeraphinaMultilingualNeural` |
 | VAD | Silero (lokal) | läuft in-Process, keine API-Latenz |
 | Turn Detection | LiveKit Multilingual | erkennt Gesprächsende besser als reine Silence-Detection |
 
+Wer experimentieren will, kann STT auf Deepgram (EU-Endpoint) und LLM auf Vertex AI Gemini 2.5 Flash Lite umstellen — das senkt die First-Response-Latenz, erfordert aber zusätzliche Provider-Keys. Die `.env` enthält die Variablen dafür weiterhin.
+
 ## DSGVO-Status
 
-- **Vertex AI:** europe-west4, DPA via Google Cloud Terms
-- **Deepgram EU:** Frankfurt-Region, SCCs
-- **Cartesia:** Zero-Retention-Mode in der Cartesia-Konsole aktivieren (`Data Retention: None`), DPA anfordern
+- **Azure OpenAI:** "EU Data Zone Standard"-Deployment in `swedencentral`, **nicht** "Global Standard"
+- **Azure Speech:** Speech-Resource in EU-Region (`swedencentral`, `germanywestcentral`, `westeurope`) anlegen
+- **Optional Vertex AI:** europe-west4, DPA via Google Cloud Terms
+- **Optional Deepgram:** EU-Endpoint `https://api.eu.deepgram.com` nutzen, DPA/AVV abschließen, keine Trainingsnutzung vereinbaren
 
 Details → `docs/dsgvo-compliance.md`

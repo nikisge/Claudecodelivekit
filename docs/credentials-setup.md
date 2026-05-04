@@ -6,9 +6,9 @@ Alle Provider-Accounts + Keys für die drei Agents. Reihenfolge so gewählt, das
 
 | Agent | Services |
 |---|---|
-| **01 Simple Latency** | Google Cloud (Vertex AI) · Deepgram · Cartesia |
-| **02 Termin-Assistent** | Azure OpenAI · Deepgram · ElevenLabs · Google Calendar |
-| **03 Outbound-Telephony** | Azure OpenAI · Deepgram · ElevenLabs · Twilio (nur auf VPS) |
+| **01 Simple Latency** | Azure OpenAI · Azure Speech *(optional: Deepgram EU + Vertex AI)* |
+| **02 Termin-Assistent** | Azure OpenAI · Azure Speech · Google Calendar |
+| **03 Outbound-Telephony** | Azure OpenAI · Azure Speech · Twilio (nur auf VPS) |
 
 ## Quick-Links
 
@@ -16,19 +16,19 @@ Alle Provider-Accounts + Keys für die drei Agents. Reihenfolge so gewählt, das
 |---|---|---|
 | Google Cloud | [console.cloud.google.com](https://console.cloud.google.com/) | Project-ID, Service-Account-JSON |
 | Azure OpenAI | [portal.azure.com](https://portal.azure.com/#create/Microsoft.CognitiveServicesOpenAI) | Endpoint + API-Key |
+| Azure Speech | [portal.azure.com](https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices) | Speech-Key + Region |
 | Azure AI Foundry | [ai.azure.com](https://ai.azure.com/) | Modell-Deployment |
-| Deepgram | [console.deepgram.com](https://console.deepgram.com/) | API-Key + EU-Region im Projekt |
-| Cartesia | [play.cartesia.ai](https://play.cartesia.ai/) | API-Key + Voice-ID |
-| ElevenLabs | [elevenlabs.io/app](https://elevenlabs.io/app/settings/api-keys) | API-Key + Voice-ID |
+| Deepgram | [console.deepgram.com](https://console.deepgram.com/) | STT-Key + EU-Endpoint |
+| Cartesia/ElevenLabs optional | Anbieter-Konsole | Alternative TTS nur mit Enterprise/EU/Zero-Retention |
 | Twilio | [console.twilio.com](https://console.twilio.com/) | Trunk + Nummer (nur VPS) |
 
 `cp .env.example .env` und unten die Keys nacheinander eintragen.
 
 ---
 
-## 1. Google Cloud (Vertex AI + Calendar)
+## 1. Google Cloud (Calendar + optional Vertex AI)
 
-Ein einziger Service Account für beides — Vertex AI (Agent 01) und Calendar (Agent 02).
+Pflicht nur für Agent 02 (Calendar). Vertex AI ist Agent-01-Alternative; wer beim Azure-Default bleibt, kann diesen Abschnitt für Agent 01 überspringen.
 
 > **Warum Service Account statt OAuth2 (wie in n8n)?** Der Agent läuft in einem Docker-Container ohne Browser, ein OAuth2-Redirect-Flow wäre umständlich. Außerdem zwingt Google OAuth2-Apps mit Calendar-Scope in den Testing-Mode (100 User max) oder eine wochenlange App-Verification. Für den 1-Kalender-Fall ist SA deutlich einfacher. Multi-Tenant-Szenarien (mehrere Kunden mit eigenem Kalender) wären ein Grund, OAuth2 zu nutzen — für dieses Tutorial nicht relevant.
 
@@ -86,7 +86,29 @@ AZURE_OPENAI_DEPLOYMENT=gpt-4.1-mini
 
 ---
 
-## 3. Deepgram (STT — alle Agents)
+## 3. Azure Speech (STT + TTS — alle Agents)
+
+**DSGVO:** Speech-Resource in einer EU-Region anlegen, z. B. `swedencentral`, `germanywestcentral`, `westeurope` oder `francecentral`. Microsoft dokumentiert, dass Azure Speech Daten nicht außerhalb der Region der Speech-Resource speichert oder verarbeitet.
+
+1. Resource anlegen: https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices
+2. Region wählen: z. B. `swedencentral` (passt gut zu Azure OpenAI Sweden Central).
+3. **Keys and Endpoint** → Key 1 kopieren.
+4. Stimme wählen. Gute deutsche Defaults:
+   - `de-DE-SeraphinaMultilingualNeural` (weiblich, modern)
+   - `de-DE-FlorianMultilingualNeural` (männlich, modern)
+   - `de-DE-KatjaNeural` (weiblich, stabil)
+   - `de-DE-ConradNeural` (männlich, stabil)
+
+```env
+AZURE_SPEECH_KEY=<key>
+AZURE_SPEECH_REGION=swedencentral
+AZURE_SPEECH_LANGUAGE=de-DE
+AZURE_SPEECH_VOICE=de-DE-SeraphinaMultilingualNeural
+```
+
+---
+
+## 4. Deepgram (optional: STT-Alternative für Agent 01)
 
 **DSGVO:** Für EU-Verarbeitung den Deepgram-EU-Endpoint `https://api.eu.deepgram.com` nutzen. Laut Deepgram-Doku funktionieren bestehende API-Keys auch mit diesem Endpoint.
 
@@ -97,15 +119,17 @@ AZURE_OPENAI_DEPLOYMENT=gpt-4.1-mini
 ```env
 DEEPGRAM_API_KEY=<key>
 DEEPGRAM_BASE_URL=https://api.eu.deepgram.com
+DEEPGRAM_MODEL=nova-3
+DEEPGRAM_LANGUAGE=de
 ```
 
 ---
 
-## 4. Cartesia (TTS — Agent 01)
+## 5. Cartesia (optional: TTS-Alternative)
 
 1. Account: https://cartesia.ai/
 2. [play.cartesia.ai](https://play.cartesia.ai/) → **API Keys → Create**.
-3. **DSGVO:** Zero-Retention im Account-Setting aktivieren + DPA unterzeichnen (Support anschreiben).
+3. **DSGVO:** Nur als Enterprise-/Custom-Vertragsoption sauber fürs EU-only-Video verwenden. Zero-Retention im Account aktivieren, DPA unterzeichnen, EU-Hosting schriftlich oder im Account bestätigen lassen.
 4. Voice suchen: https://play.cartesia.ai/voices → nach "German" filtern, Probe anhören → **Voice-ID** kopieren (wichtig: deutsche Stimme, sonst spricht der Agent mit US-Akzent).
 
 ```env
@@ -115,11 +139,11 @@ CARTESIA_VOICE_ID=<voice-id>
 
 ---
 
-## 5. ElevenLabs (TTS — Agent 02 + 03)
+## 6. ElevenLabs (optional: TTS-Alternative)
 
-Default-Stimme: **"Johanna"** (deutsch).
+Beispielstimme: **"Johanna"** (deutsch). Nur als Alternative zum Azure-Speech-Default verwenden.
 
-1. Account: https://elevenlabs.io/ — **DSGVO:** Enterprise-Plan mit EU-Residency (sonst Data-Transfer in US).
+1. Account: https://elevenlabs.io/ — **DSGVO:** Enterprise-Plan mit EU-Residency. EU-API läuft über `https://api.eu.residency.elevenlabs.io`, mit eigenem EU-Workspace/API-Key. Zero-Retention zusätzlich aktivieren.
 2. API-Key: https://elevenlabs.io/app/settings/api-keys
 3. Voice Library → "Johanna" suchen → **Add to VoiceLab** → Voice-ID kopieren.
 
@@ -130,7 +154,7 @@ ELEVEN_VOICE_ID=<voice-id>
 
 ---
 
-## 6. Twilio (Agent 03 — nur auf VPS)
+## 7. Twilio (Agent 03 — nur auf VPS)
 
 Lokal nicht sinnvoll testbar (Twilio muss per SIP zum öffentlich erreichbaren LiveKit verbinden). Kurzfassung:
 
@@ -156,7 +180,7 @@ LIVEKIT_OUTBOUND_TRUNK_ID=ST_xxx
 
 ---
 
-## 7. LiveKit-Keys (lokal generieren)
+## 8. LiveKit-Keys (lokal generieren)
 
 ```bash
 ./scripts/generate-keys.sh
@@ -171,7 +195,7 @@ Schreibt `LIVEKIT_API_KEY` und `LIVEKIT_API_SECRET` automatisch in deine `.env`.
 Minimum für Agent 01 gesetzt?
 
 ```bash
-grep -E '^(LIVEKIT_API_KEY|LIVEKIT_API_SECRET|DEEPGRAM_API_KEY|CARTESIA_API_KEY|CARTESIA_VOICE_ID|GOOGLE_CLOUD_PROJECT)=' .env \
+grep -E '^(LIVEKIT_API_KEY|LIVEKIT_API_SECRET|AZURE_SPEECH_KEY|AZURE_SPEECH_REGION|GOOGLE_CLOUD_PROJECT)=' .env \
   | awk -F= '{print $1, ($2=="" ? "LEER!" : "ok")}'
 ```
 
@@ -188,5 +212,5 @@ Alles `ok` und `GOOGLE_CLOUD_PROJECT` ≠ `mein-gcp-projekt`? Dann los:
 
 1. **Alle Kacheln "missing"** → `./start.sh setup` übersprungen.
 2. **Kachel grün, keine Antwort** → fast immer GCP: Vertex AI API nicht aktiv, Billing fehlt, oder Project-ID steht noch auf `mein-gcp-projekt`.
-3. **Deepgram 404** → `DEEPGRAM_BASE_URL` ist falsch. Korrekt: `https://api.eu.deepgram.com`.
+3. **Azure Speech 401** → `AZURE_SPEECH_KEY` und `AZURE_SPEECH_REGION` müssen zur gleichen Speech-Resource gehören.
 4. **Agent 02 kann keinen Termin buchen (403)** → Service-Account-E-Mail nicht im Kalender freigegeben, oder Calendar API nicht aktiviert.

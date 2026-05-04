@@ -6,7 +6,7 @@ Begleit-Repo zum YouTube-Tutorial. Das Projekt zeigt drei deutsche Voice-AI-Agen
 
 | # | Agent | Zweck |
 |---|---|---|
-| **01** | `simple-latency` | Schnelle Basis-Pipeline: Browser-Mikrofon -> Deepgram STT -> Gemini via Vertex AI -> Cartesia TTS -> Browser-Audio. |
+| **01** | `simple-latency` | Schnelle Basis-Pipeline: Browser-Mikrofon -> Azure Speech STT -> Azure OpenAI gpt-4.1-mini -> Azure Speech TTS -> Browser-Audio. Optional auf Deepgram + Vertex AI umstellbar. |
 | **02** | `appointment-booking` | Terminassistent mit Tool Calling gegen Google Calendar. Kann freie Slots prüfen, Termine buchen, verschieben und absagen. |
 | **03** | `outbound-telephony` | Outbound-Lead-Qualifier. Das Frontend startet einen Anruf, LiveKit-SIP ruft via Twilio an, der Agent qualifiziert den Lead und sendet JSON zurück. |
 
@@ -22,7 +22,7 @@ cd livekit-voice-agents-de
 
 ./scripts/generate-keys.sh
 # Danach .env öffnen und Provider-Keys eintragen:
-# Deepgram, Cartesia, Google Cloud/Vertex, Azure OpenAI, ElevenLabs, Google Calendar
+# Deepgram, Azure Speech, Google Cloud/Vertex, Azure OpenAI, Google Calendar
 
 ./start.sh setup
 ./start.sh
@@ -210,10 +210,11 @@ Alle Agents verbinden sich als LiveKit-Worker zum Server und warten auf Dispatch
 
 Das Repo ist auf EU-Regionen und Zero-Retention-Optionen ausgelegt. Prüfe trotzdem pro Provider aktiv die Einstellungen und DPAs:
 
-- Deepgram-Projekt auf EU-Region stellen.
+- Deepgram-EU-Endpoint für Agent 01 nutzen und DPA/AVV abschließen.
+- Azure Speech-Resource in EU-Region anlegen.
 - Azure OpenAI als EU Data Zone Deployment nutzen.
 - Google Cloud Region `europe-west4` oder passend EU wählen.
-- ElevenLabs EU Residency/Zero Retention nur nutzen, wenn dein Account das unterstützt.
+- Deepgram, Cartesia oder ElevenLabs nur als Alternativen nutzen, wenn EU-Endpoint/EU-Residency, Zero-Retention und DPA/AVV sauber belegt sind.
 - Twilio DPA unterzeichnen und passende Region nutzen.
 
 Mehr Details stehen in `docs/dsgvo-compliance.md`.

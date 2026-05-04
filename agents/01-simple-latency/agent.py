@@ -2,21 +2,25 @@
 Agent 01 — Simple Latency
 
 Minimale STT → LLM → TTS-Pipeline. Zeigt das Grundprinzip eines LiveKit Voice-Agents
-in möglichst wenig Code, optimiert auf First-Response-Latenz.
+in möglichst wenig Code.
 
 Provider (alle EU-Region / DSGVO-konform):
-  STT: Deepgram Nova-3 (EU-Endpoint)
-  LLM: Google Gemini 2.5 Flash Lite via Vertex AI (europe-west4)
-  TTS: Cartesia Sonic Multilingual (deutsche Stimme, Zero-Retention)
+  STT: Azure Speech (EU-Region)
+  LLM: Azure OpenAI GPT-4.1-mini (Sweden Central, EU Data Zone)
+  TTS: Azure Speech Neural Voice (EU-Region)
   VAD: Silero (lokal, keine externe API)
   Turn Detection: LiveKit Multilingual Model (lokal)
+
+Alternativen mit niedrigerer Latenz, aber mehr Provider-Setup:
+  STT: Deepgram Nova-3 (EU-Endpoint)
+  LLM: Google Gemini 2.5 Flash Lite via Vertex AI (europe-west4)
 """
 
 import os
 from dotenv import find_dotenv, load_dotenv
 
 from livekit.agents import Agent, AgentSession, JobContext, WorkerOptions, cli
-from livekit.plugins import cartesia, deepgram, google, silero
+from livekit.plugins import azure, openai, silero
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
 load_dotenv(find_dotenv(usecwd=True))
@@ -39,21 +43,22 @@ async def entrypoint(ctx: JobContext) -> None:
 
     session = AgentSession(
         vad=silero.VAD.load(),
-        stt=deepgram.STT(
-            model="nova-3",
-            language="de",
-            base_url=os.getenv("DEEPGRAM_BASE_URL", "https://api.eu.deepgram.com"),
+        stt=azure.STT(
+            speech_key=os.getenv("AZURE_SPEECH_KEY"),
+            speech_region=os.getenv("AZURE_SPEECH_REGION", "swedencentral"),
+            language=os.getenv("AZURE_SPEECH_LANGUAGE", "de-DE"),
         ),
-        llm=google.LLM(
-            model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite"),
-            vertexai=True,
-            project=os.getenv("GOOGLE_CLOUD_PROJECT"),
-            location=os.getenv("GOOGLE_CLOUD_LOCATION", "europe-west4"),
+        llm=openai.LLM.with_azure(
+            model=os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4.1-mini"),
+            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+            api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+            api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2024-12-01-preview"),
         ),
-        tts=cartesia.TTS(
-            model="sonic-multilingual",
-            voice=os.getenv("CARTESIA_VOICE_ID"),
-            language="de",
+        tts=azure.TTS(
+            speech_key=os.getenv("AZURE_SPEECH_KEY"),
+            speech_region=os.getenv("AZURE_SPEECH_REGION", "swedencentral"),
+            voice=os.getenv("AZURE_SPEECH_VOICE", "de-DE-SeraphinaMultilingualNeural"),
+            language=os.getenv("AZURE_SPEECH_LANGUAGE", "de-DE"),
         ),
         turn_detection=MultilingualModel(),
     )

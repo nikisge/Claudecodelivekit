@@ -8,8 +8,8 @@ Begleit-Repo zu einem YouTube-Tutorial (deutsch) über DSGVO-konforme Voice Agen
 
 | # | Name | Demonstriert |
 |---|---|---|
-| 01 | `simple-latency` | Minimale STT→LLM→TTS-Pipeline, optimiert auf Latenz (Gemini 2.5 Flash Lite + Deepgram + Cartesia) |
-| 02 | `appointment-booking` | Multi-Turn Tool-Calling gegen Google Calendar (Azure OpenAI + ElevenLabs "Johanna") |
+| 01 | `simple-latency` | Minimale STT→LLM→TTS-Pipeline, alles über Azure (gpt-4.1-mini + Azure Speech STT/TTS). Deepgram + Vertex AI Gemini sind als optionale Latenz-Alternativen in `.env` und Doku weiter beschrieben. |
+| 02 | `appointment-booking` | Multi-Turn Tool-Calling gegen Google Calendar (Azure OpenAI + Azure Speech STT/TTS) |
 | 03 | `outbound-telephony` | Twilio SIP Outbound-Calls (**nur auf VPS** sinnvoll, nicht lokal) |
 
 Zielgruppe: Zuschauer, die das Repo klonen und mitbauen. Jede Änderung sollte damit verträglich sein — keine Abhängigkeiten außerhalb dessen, was in `docs/credentials-setup.md` aufgeführt ist.
