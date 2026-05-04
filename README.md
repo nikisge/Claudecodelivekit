@@ -6,7 +6,7 @@ Begleit-Repo zum YouTube-Tutorial. Das Projekt zeigt drei deutsche Voice-AI-Agen
 
 | # | Agent | Zweck |
 |---|---|---|
-| **01** | `simple-latency` | Schnelle Basis-Pipeline: Browser-Mikrofon -> Azure Speech STT -> Gemini via Vertex AI -> Azure Speech TTS -> Browser-Audio. |
+| **01** | `simple-latency` | Speech-to-Speech mit Gemini 2.5 Flash Live API (Vertex AI, EU). Kein STT/TTS-Hop — Audio direkt rein und raus. |
 | **02** | `appointment-booking` | Terminassistent mit Tool Calling gegen Google Calendar. Kann freie Slots prüfen, Termine buchen, verschieben und absagen. |
 | **03** | `outbound-telephony` | Outbound-Lead-Qualifier. Das Frontend startet einen Anruf, LiveKit-SIP ruft via Twilio an, der Agent qualifiziert den Lead und sendet JSON zurück. |
 
@@ -237,7 +237,7 @@ Das Repo ist auf EU-Regionen und Zero-Retention-Optionen ausgelegt. Prüfe trotz
 
 - Azure Speech-Resource in EU-Region anlegen.
 - Google Cloud Region `europe-west4` oder passend EU wählen.
-- Deepgram, Cartesia oder ElevenLabs nur als Alternativen nutzen, wenn EU-Endpoint/EU-Residency, Zero-Retention und DPA/AVV sauber belegt sind.
+- Deepgram (optional als STT-Alternative) nur mit EU-Endpoint und DPA/AVV nutzen.
 - Twilio DPA unterzeichnen und passende Region nutzen.
 
 Mehr Details stehen in `docs/dsgvo-compliance.md`.
