@@ -19,6 +19,7 @@ from __future__ import annotations
 import asyncio
 import os
 import sys
+from pathlib import Path
 
 from dotenv import load_dotenv
 from livekit import api
@@ -26,6 +27,25 @@ from livekit import api
 
 def _http_url_from_ws(ws_url: str) -> str:
     return ws_url.replace("wss://", "https://").replace("ws://", "http://")
+
+
+def _write_env_value(key: str, value: str) -> None:
+    env_path = Path(".env")
+    if not env_path.exists():
+        return
+
+    lines = env_path.read_text().splitlines()
+    updated = False
+    for i, line in enumerate(lines):
+        if line.startswith(f"{key}="):
+            lines[i] = f"{key}={value}"
+            updated = True
+            break
+
+    if not updated:
+        lines.append(f"{key}={value}")
+
+    env_path.write_text("\n".join(lines) + "\n")
 
 
 async def main() -> None:
@@ -67,7 +87,8 @@ async def main() -> None:
 
         print("✓ Outbound SIP Trunk erstellt.")
         print()
-        print("Bitte in deiner .env eintragen:")
+        _write_env_value("LIVEKIT_OUTBOUND_TRUNK_ID", response.sip_trunk_id)
+        print("In .env eingetragen:")
         print(f"LIVEKIT_OUTBOUND_TRUNK_ID={response.sip_trunk_id}")
     finally:
         await lkapi.aclose()

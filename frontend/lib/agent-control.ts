@@ -19,7 +19,7 @@ export const AGENT_LABELS: Record<AgentName, string> = {
   'outbound-telephony': 'Outbound-Anruf',
 };
 
-export type AgentState = 'running' | 'stopped' | 'starting' | 'missing';
+export type AgentState = 'running' | 'stopped' | 'starting' | 'missing' | 'failed';
 
 export async function getAgentState(name: AgentName): Promise<AgentState> {
   const containerName = AGENT_CONTAINER[name];
@@ -27,7 +27,8 @@ export async function getAgentState(name: AgentName): Promise<AgentState> {
     const container = docker.getContainer(containerName);
     const info = await container.inspect();
     if (info.State.Running) return 'running';
-    if (info.State.Restarting) return 'starting';
+    if (info.State.Restarting) return 'failed';
+    if (info.State.ExitCode && info.State.ExitCode !== 0) return 'failed';
     return 'stopped';
   } catch (err) {
     // Container existiert nicht → noch nicht gebaut

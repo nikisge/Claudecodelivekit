@@ -6,7 +6,7 @@ Alle Provider-Accounts + Keys für die drei Agents. Reihenfolge so gewählt, das
 
 | Agent | Services |
 |---|---|
-| **01 Simple Latency** | Google Cloud (Vertex AI) · Azure Speech |
+| **01 Simple Latency** | Google Cloud (Vertex AI / Gemini Live Native Audio) |
 | **02 Termin-Assistent** | Google Cloud (Vertex AI) · Azure Speech · Google Calendar |
 | **03 Outbound-Telephony** | Google Cloud (Vertex AI) · Azure Speech · Twilio (nur auf VPS) |
 
@@ -184,7 +184,7 @@ grep -E '^(LIVEKIT_API_KEY|LIVEKIT_API_SECRET|AZURE_SPEECH_KEY|AZURE_SPEECH_REGI
 Alles `ok` und `GOOGLE_CLOUD_PROJECT` ≠ `mein-gcp-projekt`? Dann los:
 
 ```bash
-./start.sh setup   # einmalig: Images bauen + Container anlegen (~5 Min)
+./start.sh setup   # einmalig: Infrastruktur bauen
 ./start.sh         # Infra starten
 ```
 
@@ -192,7 +192,7 @@ Alles `ok` und `GOOGLE_CLOUD_PROJECT` ≠ `mein-gcp-projekt`? Dann los:
 
 ## Häufigste Startprobleme
 
-1. **Alle Kacheln "missing"** → `./start.sh setup` übersprungen.
+1. **Kachel "missing"** → konkreten Agent vorbereiten, z. B. `./start.sh setup 1`.
 2. **Kachel grün, keine Antwort** → fast immer GCP: Vertex AI API nicht aktiv, Billing fehlt, oder Project-ID steht noch auf `mein-gcp-projekt`.
 3. **Azure Speech 401** → `AZURE_SPEECH_KEY` und `AZURE_SPEECH_REGION` müssen zur gleichen Speech-Resource gehören.
 4. **Agent 02 kann keinen Termin buchen (403)** → Service-Account-E-Mail nicht im Kalender freigegeben, oder Calendar API nicht aktiviert.

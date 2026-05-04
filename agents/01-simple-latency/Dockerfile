@@ -8,10 +8,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml ./
-RUN pip install --no-cache-dir .
+COPY common/requirements-simple.txt /tmp/requirements-simple.txt
+RUN pip install --no-cache-dir -r /tmp/requirements-simple.txt
 
-COPY agent.py ./
+COPY 01-simple-latency/pyproject.toml ./
+COPY 01-simple-latency/agent.py ./
 
 # LiveKit VAD/Turn-Detector laden Modell-Gewichte beim ersten Start;
 # Pre-Download spart Zeit beim Cold-Start im Prod.

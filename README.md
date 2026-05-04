@@ -29,10 +29,9 @@ Das installiert Docker + Compose-Plugin, setzt die Firewall-Regeln, erzeugt die 
    - `AZURE_SPEECH_KEY` (Azure Speech Resource Key)
    - `APP_DOMAIN`, `LIVEKIT_DOMAIN`, `CADDY_EMAIL`, `LIVEKIT_URL` (für TLS-Produktion)
 2. **Service-Account-JSON nach `secrets/gcp-sa.json` legen**
-3. **Agents bauen + starten**:
+3. **Services bauen + starten**:
    ```bash
-   ./start.sh setup            # Agent-Images bauen (~5 Min, einmalig)
-   docker compose up -d --build # Produktion mit Caddy + TLS
+   ./start.sh vps 1            # nutzt automatisch sslip.io + Caddy TLS
    ```
 
 Provider-Setup-Details siehe `docs/credentials-setup.md`.
@@ -63,14 +62,18 @@ Was die Befehle machen:
 
 | Befehl | Effekt |
 |---|---|
-| `./start.sh setup` | Baut die drei Agent-Images und legt die Agent-Container an, startet sie aber noch nicht. Einmalig nach Clone oder Dockerfile/Dependency-Änderungen. |
+| `./start.sh setup` | Baut nur die lokale Infrastruktur, vor allem das Frontend. Schnellster Demo-Start nach Clone. |
+| `./start.sh setup 1` | Baut nur Agent 1 und legt `voice-agent-1` an, startet ihn aber noch nicht. |
+| `./start.sh setup 2` | Baut nur Agent 2 und legt `voice-agent-2` an, startet ihn aber noch nicht. |
+| `./start.sh setup 3` | Baut nur Agent 3 und legt `voice-agent-3` an, startet ihn aber noch nicht. |
+| `./start.sh setup all` | Baut alle drei Agent-Images. Nur nutzen, wenn du wirklich alle drei in derselben Demo brauchst. |
 | `./start.sh` oder `./start.sh up` | Startet Redis, LiveKit und das Frontend. Danach steuerst du die Agents im Browser. |
 | `./start.sh status` | Zeigt Infrastruktur und Agent-Container. |
 | `./start.sh logs` | Zeigt laufende Logs aller lokalen Compose-Services. |
 | `./start.sh agent-logs 1` | Zeigt Logs von Agent 1. Für Agent 2/3 entsprechend `2` oder `3`. |
 | `./start.sh stop` | Stoppt Infrastruktur und eventuell laufende Agents. |
 
-Wenn im Browser bei einer Agent-Kachel `missing` oder ein Container-Fehler erscheint, wurde sehr wahrscheinlich `./start.sh setup` noch nicht ausgeführt.
+Wenn im Browser bei einer Agent-Kachel `missing` oder ein Container-Fehler erscheint, wurde der konkrete Agent noch nicht vorbereitet. Nutze dann `./start.sh setup 1`, `./start.sh setup 2` oder `./start.sh setup 3`.
 
 ### Lokal entwickeln
 
@@ -137,7 +140,7 @@ cd livekit-voice-agents-de
 nano .env
 ```
 
-Wichtige VPS-Werte:
+Wichtige VPS-Werte, wenn du eine eigene Domain nutzt:
 
 ```bash
 APP_DOMAIN=voice.deine-domain.de
@@ -145,6 +148,14 @@ LIVEKIT_DOMAIN=lk.deine-domain.de
 CADDY_EMAIL=admin@deine-domain.de
 LIVEKIT_URL=wss://lk.deine-domain.de
 GOOGLE_SERVICE_ACCOUNT_PATH=./secrets/gcp-sa.json
+```
+
+Ohne eigene Domain setzt `./start.sh vps 1` automatisch kostenlose sslip.io-Domains anhand der Server-IP, z. B.:
+
+```bash
+APP_DOMAIN=voice-187-124-175-89.sslip.io
+LIVEKIT_DOMAIN=lk-187-124-175-89.sslip.io
+LIVEKIT_URL=wss://lk-187-124-175-89.sslip.io
 ```
 
 4. Google-Service-Account-Datei auf den VPS legen:
@@ -155,15 +166,30 @@ mkdir -p secrets
 scp ~/Downloads/gcp-sa.json root@<vps-ip>:/opt/livekit-voice-agents-de/secrets/gcp-sa.json
 ```
 
-5. Alles starten:
+5. Infrastruktur und den gewünschten Agent starten:
 
 ```bash
-docker compose up -d --build
-docker compose ps
-docker compose logs -f caddy
+./start.sh vps 1
 ```
 
-Caddy holt automatisch TLS-Zertifikate. Danach sollte `https://voice.deine-domain.de` erreichbar sein.
+Caddy holt automatisch TLS-Zertifikate. Danach ist das Frontend über die ausgegebene HTTPS-URL erreichbar.
+
+Weitere Agents schaltest du nur bei Bedarf dazu:
+
+```bash
+./start.sh vps 2
+./start.sh vps 3
+./start.sh vps all
+```
+
+Einzelne Agents stoppst du entweder im Frontend über den Stop-Button oder per CLI:
+
+```bash
+./start.sh vps-stop 1
+./start.sh vps-stop 2
+./start.sh vps-stop 3
+./start.sh vps-stop all
+```
 
 VPS stoppen:
 

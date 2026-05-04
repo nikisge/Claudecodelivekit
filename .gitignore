@@ -32,6 +32,7 @@ out/
 caddy_data/
 caddy_config/
 recordings/
+livekit-sip.generated.yaml
 
 # Claude Code
 .claude/

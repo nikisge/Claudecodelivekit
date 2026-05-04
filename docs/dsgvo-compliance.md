@@ -6,7 +6,7 @@ Dieses Repo ist darauf ausgelegt, nur mit EU-Region-Endpoints oder Zero-Retentio
 
 | Komponente | Provider | DSGVO-Konfiguration |
 |---|---|---|
-| LLM Agent 01 | Google Vertex AI — Gemini 2.5 Flash Lite | `europe-west4` (Niederlande) oder unterstützte EU-Region |
+| Realtime-Modell Agent 01 | Google Vertex AI — Gemini 2.5 Flash Native Audio | `europe-west4` (Niederlande) oder unterstützte EU-Region |
 | LLM Agent 02+03 | Google Vertex AI — Gemini 2.5 Flash | `europe-west4` (Niederlande) oder unterstützte EU-Region |
 | STT alle Agents | Azure Speech | Speech-Resource in EU-Region, z. B. `swedencentral`, `germanywestcentral`, `westeurope` |
 | TTS alle Agents | Azure Speech Neural Voices | Speech-Resource in EU-Region, z. B. `de-DE-SeraphinaMultilingualNeural` |

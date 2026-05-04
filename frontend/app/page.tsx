@@ -5,11 +5,12 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
 type AgentKey = 'simple-latency' | 'appointment-booking' | 'outbound-telephony';
-type AgentState = 'running' | 'stopped' | 'starting' | 'missing';
+type AgentState = 'running' | 'stopped' | 'starting' | 'missing' | 'failed';
 
 type AgentCardData = {
   key: AgentKey;
   href: string;
+  setupCommand: string;
   badge: string;
   title: string;
   description: string;
@@ -20,15 +21,17 @@ const AGENTS: AgentCardData[] = [
   {
     key: 'simple-latency',
     href: '/agent/simple-latency',
+    setupCommand: './start.sh setup 1',
     badge: '01 · Latency',
     title: 'Simple Latency',
     description:
-      'Minimale STT→LLM→TTS-Pipeline. Zeigt das Grundprinzip eines Voice-Agents in ~80 Zeilen Code.',
-    stack: 'Gemini 2.5 Flash Lite · Azure Speech',
+      'Native Audio direkt rein und raus. Zeigt niedrige Latenz ohne separaten STT/TTS-Hop.',
+    stack: 'Gemini 2.5 Flash Native Audio · Vertex AI',
   },
   {
     key: 'appointment-booking',
     href: '/agent/appointment-booking',
+    setupCommand: './start.sh setup 2',
     badge: '02 · Tool Calling',
     title: 'Termin-Assistent',
     description:
@@ -38,6 +41,7 @@ const AGENTS: AgentCardData[] = [
   {
     key: 'outbound-telephony',
     href: '/outbound',
+    setupCommand: './start.sh setup 3',
     badge: '03 · Telephony',
     title: 'Outbound-Anruf',
     description:
@@ -88,6 +92,8 @@ export default function LandingPage() {
       if (!res.ok) {
         const data = await res.json();
         setError(data.error || 'Start fehlgeschlagen');
+        await refresh();
+        return;
       }
       setStatuses((s) => ({ ...s, [key]: 'starting' }));
       setTimeout(refresh, 1500);
@@ -167,6 +173,7 @@ function AgentCard({
   const isRunning = state === 'running';
   const isStarting = state === 'starting' || busy;
   const isMissing = state === 'missing';
+  const isFailed = state === 'failed';
 
   return (
     <div className="border-border bg-background flex flex-col rounded-2xl border p-6 transition-colors">
@@ -188,10 +195,10 @@ function AgentCard({
           <Button
             size="sm"
             className="flex-1"
-            disabled={isStarting || isMissing}
+            disabled={isStarting || isMissing || isFailed}
             onClick={onStart}
           >
-            {isStarting ? 'Startet…' : isMissing ? 'Image fehlt' : 'Start'}
+            {isStarting ? 'Startet…' : isMissing ? 'Image fehlt' : isFailed ? 'Fehler' : 'Start'}
           </Button>
         )}
         {isRunning && (
@@ -208,7 +215,12 @@ function AgentCard({
 
       {isMissing && (
         <p className="text-muted-foreground mt-2 font-mono text-[10px] leading-relaxed">
-          docker compose --profile all-agents build
+          {agent.setupCommand}
+        </p>
+      )}
+      {isFailed && (
+        <p className="text-destructive mt-2 text-xs leading-relaxed">
+          Container crasht. Logs im Terminal prüfen.
         </p>
       )}
     </div>
@@ -221,6 +233,7 @@ function StateBadge({ state }: { state: AgentState }) {
     starting: { label: 'startet', cls: 'bg-yellow-500/15 text-yellow-700' },
     stopped: { label: 'gestoppt', cls: 'bg-gray-500/15 text-gray-600' },
     missing: { label: 'nicht gebaut', cls: 'bg-gray-500/15 text-gray-500' },
+    failed: { label: 'Fehler', cls: 'bg-red-500/15 text-red-700' },
   };
   const c = config[state];
   return (

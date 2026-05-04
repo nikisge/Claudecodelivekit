@@ -11,8 +11,7 @@
 # Danach nur noch:
 #   1. .env mit GOOGLE_CLOUD_PROJECT + AZURE_SPEECH_KEY füllen
 #   2. Service-Account-JSON nach secrets/gcp-sa.json legen
-#   3. ./start.sh setup   (baut Agent-Images, ~5 Min)
-#   4. ./start.sh         (startet Infrastruktur)
+#   3. ./start.sh vps 1   (setzt sslip.io + startet Infrastruktur und Agent 1)
 
 set -euo pipefail
 
@@ -95,20 +94,20 @@ echo
 echo "  1. ${YELLOW}.env editieren${NC} — folgende Werte setzen:"
 echo "       GOOGLE_CLOUD_PROJECT=<deine-gcp-project-id>"
 echo "       AZURE_SPEECH_KEY=<dein-azure-speech-key>"
-echo "       APP_DOMAIN=<deine-domain-oder-sslip-pseudo-domain>"
-echo "       LIVEKIT_DOMAIN=<lk.deine-domain>"
 echo "       CADDY_EMAIL=<deine-email-für-letsencrypt>"
-echo "       LIVEKIT_URL=wss://<deine-livekit-domain>"
+echo "       # APP_DOMAIN/LIVEKIT_DOMAIN/LIVEKIT_URL setzt ./start.sh vps 1"
+echo "       # automatisch auf kostenlose sslip.io-Domains, falls noch Platzhalter."
 echo
 echo "  2. ${YELLOW}Google-Service-Account-JSON hochladen${NC}:"
 echo "       scp gcp-sa.json root@<vps-ip>:$(pwd)/secrets/gcp-sa.json"
 echo
-echo "  3. ${YELLOW}Agent-Images bauen${NC} (einmalig, ~5 Min):"
-echo "       ./start.sh setup"
+echo "  3. ${YELLOW}VPS mit Agent 1 starten${NC} (setzt automatisch sslip.io + HTTPS):"
+echo "       ./start.sh vps 1"
 echo
-echo "  4. ${YELLOW}Alles starten${NC}:"
-echo "       docker compose up -d --build       # Produktion mit TLS"
-echo "       ODER  ./start.sh                   # nur Infra für lokales Testen"
+echo "  4. ${YELLOW}Weitere Agents bei Bedarf starten${NC}:"
+echo "       ./start.sh vps 2"
+echo "       ./start.sh vps 3"
+echo "       ./start.sh vps all"
 echo
 echo "Provider-Setup-Details: docs/credentials-setup.md"
 echo "════════════════════════════════════════════════════════════════════════"

@@ -90,7 +90,7 @@ room.on(RoomEvent.DataReceived, (payload) => {
 
 | Agent | Ziel | Gewählt | Warum |
 |---|---|---|---|
-| 01 | minimal latency | Gemini 2.5 Flash Lite | schnellstes DSGVO-konformes LLM |
+| 01 | minimal latency | Gemini 2.5 Flash Native Audio | Speech-to-Speech ohne separaten STT/TTS-Hop |
 | 02 | Tool Calling, strukturierte Args | Azure GPT-4.1 mini | bessere Tool-Intent-Erkennung als Flash Lite |
 | 03 | Gespräch + Tool Calling | Azure GPT-4.1 mini | wie Agent 02 — Qualifikation braucht Intelligenz, Latenz ist im Telefonat weniger kritisch |
 

@@ -42,6 +42,7 @@ services:
   frontend:
     build:
       context: ./frontend
+      target: dev
     container_name: voice-frontend
     restart: unless-stopped
     depends_on:
@@ -59,7 +60,8 @@ services:
 
   agent-simple-latency:
     build:
-      context: ./agents/01-simple-latency
+      context: ./agents
+      dockerfile: 01-simple-latency/Dockerfile
     image: voice-agent-simple-latency
     container_name: voice-agent-1
     profiles: ["agent1", "all-agents"]
@@ -75,7 +77,8 @@ services:
 
   agent-appointment-booking:
     build:
-      context: ./agents/02-appointment-booking
+      context: ./agents
+      dockerfile: 02-appointment-booking/Dockerfile
     image: voice-agent-appointment-booking
     container_name: voice-agent-2
     profiles: ["agent2", "all-agents"]
@@ -92,7 +95,8 @@ services:
 
   agent-outbound-telephony:
     build:
-      context: ./agents/03-outbound-telephony
+      context: ./agents
+      dockerfile: 03-outbound-telephony/Dockerfile
     image: voice-agent-outbound-telephony
     container_name: voice-agent-3
     profiles: ["agent3", "all-agents"]
@@ -102,3 +106,7 @@ services:
     env_file: .env
     environment:
       LIVEKIT_URL: ws://livekit-server:7990
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/gcp-sa.json
+      AZURE_SPEECH_VOICE: de-DE-FlorianMultilingualNeural
+    volumes:
+      - ./secrets/gcp-sa.json:/secrets/gcp-sa.json:ro

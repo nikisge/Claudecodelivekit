@@ -45,7 +45,7 @@ GOOGLE_CALENDAR_ID=primary
 
 ## 5. Vertex AI (gleiches Projekt, für Agent 01)
 
-Agent 01 nutzt Gemini 2.5 Flash Lite. Wenn du Vertex AI im gleichen GCP-Projekt aktivierst:
+Agent 01 nutzt Gemini 2.5 Flash Native Audio über Vertex AI. Wenn du Vertex AI im gleichen GCP-Projekt aktivierst:
 
 1. **APIs & Services → Library → „Vertex AI API" → Enable**
 2. Dem gleichen Service Account im **IAM** die Rolle `Vertex AI User` geben

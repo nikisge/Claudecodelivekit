@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     await sipClient.createSipParticipant(trunkId, phone, roomName, {
       participantIdentity: `caller-${phone}`,
       participantName: name,
-      waitUntilAnswered: false,
+      waitUntilAnswered: true,
     });
 
     return NextResponse.json({ roomName, status: 'dispatched' });

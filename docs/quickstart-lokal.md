@@ -66,7 +66,7 @@ Check: `curl http://localhost:7990` gibt `404 page not found` zurück — das is
 open http://localhost:3000
 ```
 
-Du siehst die Agent-Übersicht mit drei Kacheln. Die Agent-Container startest und stoppst du direkt im Browser.
+Du siehst die Agent-Übersicht mit drei Kacheln. Bereite nur den Agent vor, den du zeigen willst, z. B. `./start.sh setup 1`; danach startest und stoppst du ihn direkt im Browser.
 
 ### 5. Agent 1 starten
 

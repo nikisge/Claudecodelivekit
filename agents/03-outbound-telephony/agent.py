@@ -15,6 +15,7 @@ Voraussetzung: LIVEKIT_OUTBOUND_TRUNK_ID ist gesetzt (über scripts/setup-sip.py
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 
@@ -126,6 +127,10 @@ async def entrypoint(ctx: JobContext) -> None:
 
     # Bei Outbound-Calls wartet das LiveKit-SIP-Service bis der Angerufene abhebt,
     # dann tritt der SIP-Teilnehmer dem Room bei und der Agent beginnt.
+    greeting_delay = float(os.getenv("OUTBOUND_GREETING_DELAY_SECONDS", "1.2"))
+    if greeting_delay > 0:
+        await asyncio.sleep(greeting_delay)
+
     await session.generate_reply(
         instructions=(
             f"Begrüße {caller_name} kurz auf Deutsch. Stelle dich als KI-Assistentin vor, "

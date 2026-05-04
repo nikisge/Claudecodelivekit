@@ -8,6 +8,13 @@ COPY package.json pnpm-lock.yaml ./
 # nur via Unix-Socket, nicht SSH — die native-Binaries sind nicht nötig).
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
+FROM deps AS dev
+WORKDIR /app
+COPY . .
+ENV NEXT_TELEMETRY_DISABLED=1
+EXPOSE 3000
+CMD ["pnpm", "dev", "--hostname", "0.0.0.0"]
+
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
