@@ -26,7 +26,7 @@ export async function POST(req: Request) {
         {
           error:
             'Agent-Container existiert noch nicht. Einmalig im Terminal ausführen: ' +
-            'docker compose --profile all-agents build',
+            './start.sh setup',
         },
         { status: 409 }
       );

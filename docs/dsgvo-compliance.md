@@ -38,7 +38,7 @@ Für das Tutorial: `europe-west4` setzen und im Video ehrlich adressieren, dass 
 
 ### Deepgram
 
-Deepgram hat seit 2026 einen dedizierten EU-Endpoint (Frankfurt AWS). URL: `https://api.eu.deepgram.com`. In `.env`:
+Deepgram stellt einen dedizierten EU-Endpoint bereit. URL: `https://api.eu.deepgram.com`. In `.env`:
 
 ```
 DEEPGRAM_BASE_URL=https://api.eu.deepgram.com

@@ -10,6 +10,6 @@
 
 # LiveKit WebSocket-Endpoint für Browser-Clients
 {$LIVEKIT_DOMAIN} {
-	reverse_proxy livekit-server:7880
+	reverse_proxy host.docker.internal:7880
 	encode gzip
 }

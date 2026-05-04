@@ -2,7 +2,8 @@ api_key: ${LIVEKIT_API_KEY}
 api_secret: ${LIVEKIT_API_SECRET}
 ws_url: ${LIVEKIT_URL}
 redis:
-  address: redis:6379
+  # livekit-sip läuft im Host-Netzwerk; Redis ist dort über localhost erreichbar.
+  address: 127.0.0.1:6379
 sip_port: 5060
 rtp_port: 10000-20000
 logging:

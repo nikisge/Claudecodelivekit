@@ -61,23 +61,22 @@ GOOGLE_CALENDAR_ID=primary
 
 Details zu jedem Provider: `docs/dsgvo-compliance.md` und `docs/google-calendar-setup.md`.
 
-### 3. LiveKit-Server + Redis starten
+### 3. Infrastruktur starten
 
 ```bash
-docker compose -f docker-compose.local.yml up -d redis livekit-server
+./start.sh setup
+./start.sh
 ```
 
-Check: `curl http://localhost:7880` gibt `404 page not found` zurück — das ist OK, der Server antwortet.
+Check: `curl http://localhost:7990` gibt `404 page not found` zurück — das ist OK, der Server antwortet.
 
-### 4. Frontend starten
+### 4. Frontend öffnen
 
 ```bash
-cd frontend
-pnpm install
-pnpm dev
+open http://localhost:3000
 ```
 
-→ Öffne http://localhost:3000. Du siehst die Landing-Page mit drei Kacheln.
+Du siehst die Agent-Übersicht mit drei Kacheln. Die Agent-Container startest und stoppst du direkt im Browser.
 
 ### 5. Agent 1 starten
 
@@ -105,11 +104,11 @@ Im Browser auf **Termin-Assistent** klicken. Sprich: „Ich möchte am Freitag u
 
 ## Troubleshooting
 
-**Browser: „Token endpoint error"** → prüfe `NEXT_PUBLIC_LIVEKIT_URL=ws://localhost:7880` und `LIVEKIT_URL=ws://localhost:7880` in der Frontend-ENV.
+**Browser: „Token endpoint error"** → lokal muss das Frontend `NEXT_PUBLIC_LIVEKIT_URL=ws://localhost:7990` nutzen. Im Docker-Setup ist das bereits in `docker-compose.local.yml` gesetzt.
 
 **Agent joint den Room nicht** → `docker compose logs livekit-server` anschauen. Häufig: LIVEKIT_API_KEY stimmt zwischen Server und Agent nicht überein.
 
-**STT versteht nichts** → Deepgram-Key prüfen, `DEEPGRAM_BASE_URL=https://api.eu.deepgram.com` gesetzt? Sample-Rate des Browser-Mikrofons testen.
+**STT versteht nichts** → Deepgram-Key prüfen und `DEEPGRAM_BASE_URL=https://api.eu.deepgram.com` setzen. Sample-Rate des Browser-Mikrofons testen.
 
 **Cartesia: „Voice not found"** → in der Cartesia-Konsole unter Voices eine deutsche Stimme auswählen, Voice-ID kopieren nach `CARTESIA_VOICE_ID`.
 

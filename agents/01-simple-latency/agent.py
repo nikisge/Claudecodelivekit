@@ -42,7 +42,7 @@ async def entrypoint(ctx: JobContext) -> None:
         stt=deepgram.STT(
             model="nova-3",
             language="de",
-            base_url=os.getenv("DEEPGRAM_BASE_URL", "https://api.deepgram.com"),
+            base_url=os.getenv("DEEPGRAM_BASE_URL", "https://api.eu.deepgram.com"),
         ),
         llm=google.LLM(
             model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite"),

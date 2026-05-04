@@ -91,8 +91,7 @@ Siehe `docs/twilio-setup.md`. Kurz:
 2. Origination URI: `sip:<vps-ip>:5060;transport=udp`
 3. Dein Twilio-Kauf-Nummer dem Trunk zuweisen
 4. Trunk-Zugangsdaten (SID, Token) + Trunk-URI in VPS `.env` eintragen
-5. Auf VPS: `docker compose exec agent-outbound-telephony python /app/../../scripts/setup-sip.py`
-   (oder direkt auf Host: `python3 scripts/setup-sip.py` nach `pip install livekit python-dotenv`)
+5. Auf VPS: `python3 -m pip install livekit python-dotenv` und danach `python3 scripts/setup-sip.py`
 6. Die ausgegebene `LIVEKIT_OUTBOUND_TRUNK_ID` in `.env` setzen
 7. `docker compose up -d --force-recreate frontend` (damit die Variable in Next.js Runtime ankommt)
 

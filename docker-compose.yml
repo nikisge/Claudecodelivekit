@@ -18,6 +18,8 @@ services:
       APP_DOMAIN: ${APP_DOMAIN}
       LIVEKIT_DOMAIN: ${LIVEKIT_DOMAIN}
       CADDY_EMAIL: ${CADDY_EMAIL}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
@@ -26,6 +28,7 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    network_mode: host
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -68,8 +71,10 @@ services:
       - livekit-server
     env_file: .env
     environment:
-      LIVEKIT_URL: ws://livekit-server:7880
+      LIVEKIT_URL: ws://host.docker.internal:7880
       AGENT_NAME: simple-latency
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   agent-appointment-booking:
     build:
@@ -79,8 +84,10 @@ services:
       - livekit-server
     env_file: .env
     environment:
-      LIVEKIT_URL: ws://livekit-server:7880
+      LIVEKIT_URL: ws://host.docker.internal:7880
       AGENT_NAME: appointment-booking
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       # Service-Account-JSON vom Host read-only in Container
       - ${GOOGLE_SERVICE_ACCOUNT_PATH}:/secrets/gcp-sa.json:ro
@@ -93,8 +100,10 @@ services:
       - livekit-server
     env_file: .env
     environment:
-      LIVEKIT_URL: ws://livekit-server:7880
+      LIVEKIT_URL: ws://host.docker.internal:7880
       AGENT_NAME: outbound-telephony
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   frontend:
     build:
@@ -106,8 +115,10 @@ services:
     environment:
       # Browser verbindet über TLS-Subdomain, nicht über interne Service-DNS
       NEXT_PUBLIC_LIVEKIT_URL: wss://${LIVEKIT_DOMAIN}
-      # Backend-seitige Operationen (Token-Issuing, Dispatch) via interne DNS
-      LIVEKIT_URL: ws://livekit-server:7880
+      # Backend-seitige Operationen laufen gegen den LiveKit-Prozess im Host-Netzwerk
+      LIVEKIT_URL: ws://host.docker.internal:7880
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   caddy_data:

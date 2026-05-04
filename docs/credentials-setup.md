@@ -88,15 +88,15 @@ AZURE_OPENAI_DEPLOYMENT=gpt-4.1-mini
 
 ## 3. Deepgram (STT — alle Agents)
 
-**DSGVO:** EU-Residency wird **nicht** per URL gesetzt (ein `api.eu.deepgram.com`-Hostname existiert nicht) — sondern im Dashboard pro Projekt.
+**DSGVO:** Für EU-Verarbeitung den Deepgram-EU-Endpoint `https://api.eu.deepgram.com` nutzen. Laut Deepgram-Doku funktionieren bestehende API-Keys auch mit diesem Endpoint.
 
 1. Account: https://deepgram.com/
-2. Projekt-Settings: https://console.deepgram.com/ → **Settings → Region: EU**.
-3. **API Keys → Create** (Rolle "Member" reicht).
+2. API Keys: https://console.deepgram.com/ → **API Keys → Create**.
+3. Rolle "Member" reicht für dieses Projekt.
 
 ```env
 DEEPGRAM_API_KEY=<key>
-DEEPGRAM_BASE_URL=https://api.deepgram.com/v1/listen
+DEEPGRAM_BASE_URL=https://api.eu.deepgram.com
 ```
 
 ---
@@ -188,5 +188,5 @@ Alles `ok` und `GOOGLE_CLOUD_PROJECT` ≠ `mein-gcp-projekt`? Dann los:
 
 1. **Alle Kacheln "missing"** → `./start.sh setup` übersprungen.
 2. **Kachel grün, keine Antwort** → fast immer GCP: Vertex AI API nicht aktiv, Billing fehlt, oder Project-ID steht noch auf `mein-gcp-projekt`.
-3. **Deepgram 404** → `DEEPGRAM_BASE_URL` ist falsch. Korrekt: `https://api.deepgram.com/v1/listen`.
+3. **Deepgram 404** → `DEEPGRAM_BASE_URL` ist falsch. Korrekt: `https://api.eu.deepgram.com`.
 4. **Agent 02 kann keinen Termin buchen (403)** → Service-Account-E-Mail nicht im Kalender freigegeben, oder Calendar API nicht aktiviert.

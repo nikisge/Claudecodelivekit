@@ -9,7 +9,8 @@ rtc:
   use_external_ip: true
 
 redis:
-  address: redis:6379
+  # Prod läuft mit network_mode: host, daher Redis über localhost.
+  address: 127.0.0.1:6379
 
 logging:
   level: info
