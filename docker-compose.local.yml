@@ -72,9 +72,6 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: /secrets/gcp-sa.json
     volumes:
       - ./secrets/gcp-sa.json:/secrets/gcp-sa.json:ro
-      GOOGLE_APPLICATION_CREDENTIALS: /secrets/gcp-sa.json
-    volumes:
-      - ./secrets/gcp-sa.json:/secrets/gcp-sa.json:ro
 
   agent-appointment-booking:
     build:
