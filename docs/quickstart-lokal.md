@@ -11,9 +11,7 @@ Agent 3 (Outbound) funktioniert lokal nur mit ngrok-Umweg — den Teil deployen 
 - **pnpm** für Frontend (`brew install pnpm` oder `corepack enable`)
 - API-Accounts bei:
   - Google Cloud (für Vertex AI + Calendar, Service Accounts)
-  - Microsoft Azure (OpenAI, EU Data Zone)
   - Azure Speech (EU-Region für STT/TTS)
-  - Deepgram (EU-Endpoint für Agent 01)
 
 ## Schritte
 
@@ -37,22 +35,14 @@ GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-sa.json
 GOOGLE_CLOUD_PROJECT=dein-gcp-projekt
 GOOGLE_CLOUD_LOCATION=europe-west4
 
-# Azure OpenAI
-AZURE_OPENAI_API_KEY=...
-AZURE_OPENAI_ENDPOINT=https://dein-resource.openai.azure.com
-AZURE_OPENAI_DEPLOYMENT=gpt-4.1-mini
+GEMINI_MODEL=gemini-2.5-flash-lite
+GEMINI_TOOL_MODEL=gemini-2.5-flash
 
 # Azure Speech (EU)
 AZURE_SPEECH_KEY=...
 AZURE_SPEECH_REGION=swedencentral
 AZURE_SPEECH_LANGUAGE=de-DE
 AZURE_SPEECH_VOICE=de-DE-SeraphinaMultilingualNeural
-
-# Deepgram (EU, Agent 01)
-DEEPGRAM_API_KEY=...
-DEEPGRAM_BASE_URL=https://api.eu.deepgram.com
-DEEPGRAM_MODEL=nova-3
-DEEPGRAM_LANGUAGE=de
 
 # Google Calendar (für Agent 02)
 GOOGLE_SERVICE_ACCOUNT_PATH=./secrets/gcp-sa.json
@@ -108,10 +98,8 @@ Im Browser auf **Termin-Assistent** klicken. Sprich: „Ich möchte am Freitag u
 
 **Agent joint den Room nicht** → `docker compose logs livekit-server` anschauen. Häufig: LIVEKIT_API_KEY stimmt zwischen Server und Agent nicht überein.
 
-**Agent 01 versteht nichts** → `DEEPGRAM_API_KEY` und `DEEPGRAM_BASE_URL=https://api.eu.deepgram.com` prüfen. Für Deutsch `DEEPGRAM_LANGUAGE=de` setzen.
-
-**Agent 02/03 verstehen nichts** → `AZURE_SPEECH_KEY` und `AZURE_SPEECH_REGION` prüfen. Key und Region müssen zur gleichen Speech-Resource gehören.
+**Agent versteht nichts** → `AZURE_SPEECH_KEY` und `AZURE_SPEECH_REGION` prüfen. Key und Region müssen zur gleichen Speech-Resource gehören.
 
 **TTS bleibt stumm** → `AZURE_SPEECH_VOICE` prüfen. Für Deutsch z. B. `de-DE-SeraphinaMultilingualNeural`, `de-DE-FlorianMultilingualNeural`, `de-DE-KatjaNeural`.
 
-**Azure: 401** → Deployment in Azure Portal muss genau so heißen wie `AZURE_OPENAI_DEPLOYMENT`. Prüfe außerdem `AZURE_OPENAI_API_VERSION`.
+**Vertex: 403** → Vertex AI API aktivieren, Billing prüfen und sicherstellen, dass `GOOGLE_CLOUD_PROJECT` die echte Project-ID ist.

@@ -6,19 +6,17 @@ Alle Provider-Accounts + Keys für die drei Agents. Reihenfolge so gewählt, das
 
 | Agent | Services |
 |---|---|
-| **01 Simple Latency** | Azure OpenAI · Azure Speech *(optional: Deepgram EU + Vertex AI)* |
-| **02 Termin-Assistent** | Azure OpenAI · Azure Speech · Google Calendar |
-| **03 Outbound-Telephony** | Azure OpenAI · Azure Speech · Twilio (nur auf VPS) |
+| **01 Simple Latency** | Google Cloud (Vertex AI) · Azure Speech |
+| **02 Termin-Assistent** | Google Cloud (Vertex AI) · Azure Speech · Google Calendar |
+| **03 Outbound-Telephony** | Google Cloud (Vertex AI) · Azure Speech · Twilio (nur auf VPS) |
 
 ## Quick-Links
 
 | Provider | Dashboard | Was abholen |
 |---|---|---|
 | Google Cloud | [console.cloud.google.com](https://console.cloud.google.com/) | Project-ID, Service-Account-JSON |
-| Azure OpenAI | [portal.azure.com](https://portal.azure.com/#create/Microsoft.CognitiveServicesOpenAI) | Endpoint + API-Key |
 | Azure Speech | [portal.azure.com](https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices) | Speech-Key + Region |
-| Azure AI Foundry | [ai.azure.com](https://ai.azure.com/) | Modell-Deployment |
-| Deepgram | [console.deepgram.com](https://console.deepgram.com/) | STT-Key + EU-Endpoint |
+| Deepgram optional | [console.deepgram.com](https://console.deepgram.com/) | STT-Alternative mit EU-Endpoint |
 | Cartesia/ElevenLabs optional | Anbieter-Konsole | Alternative TTS nur mit Enterprise/EU/Zero-Retention |
 | Twilio | [console.twilio.com](https://console.twilio.com/) | Trunk + Nummer (nur VPS) |
 
@@ -26,9 +24,9 @@ Alle Provider-Accounts + Keys für die drei Agents. Reihenfolge so gewählt, das
 
 ---
 
-## 1. Google Cloud (Calendar + optional Vertex AI)
+## 1. Google Cloud (Vertex AI + Calendar)
 
-Pflicht nur für Agent 02 (Calendar). Vertex AI ist Agent-01-Alternative; wer beim Azure-Default bleibt, kann diesen Abschnitt für Agent 01 überspringen.
+Pflicht für alle LLMs und für Agent 02 Calendar. Kein Azure-OpenAI-Deployment nötig.
 
 > **Warum Service Account statt OAuth2 (wie in n8n)?** Der Agent läuft in einem Docker-Container ohne Browser, ein OAuth2-Redirect-Flow wäre umständlich. Außerdem zwingt Google OAuth2-Apps mit Calendar-Scope in den Testing-Mode (100 User max) oder eine wochenlange App-Verification. Für den 1-Kalender-Fall ist SA deutlich einfacher. Multi-Tenant-Szenarien (mehrere Kunden mit eigenem Kalender) wären ein Grund, OAuth2 zu nutzen — für dieses Tutorial nicht relevant.
 
@@ -61,6 +59,7 @@ GOOGLE_APPLICATION_CREDENTIALS=/secrets/gcp-sa.json
 GOOGLE_CLOUD_PROJECT=deine-project-id
 GOOGLE_CLOUD_LOCATION=europe-west4
 GEMINI_MODEL=gemini-2.5-flash-lite
+GEMINI_TOOL_MODEL=gemini-2.5-flash
 GOOGLE_SERVICE_ACCOUNT_PATH=./secrets/gcp-sa.json
 GOOGLE_CALENDAR_ID=primary
 ```
@@ -69,29 +68,12 @@ GOOGLE_CALENDAR_ID=primary
 
 ---
 
-## 2. Azure OpenAI (Agent 02 + 03)
-
-**DSGVO:** zwingend "EU Data Zone Standard" deployen, **nicht** "Global Standard".
-
-1. Resource anlegen: https://portal.azure.com/#create/Microsoft.CognitiveServicesOpenAI → Region `swedencentral`.
-2. In [Azure AI Foundry](https://ai.azure.com/) → **Deployments → Create** → Modell `gpt-4.1-mini` → Deployment-Typ: **EU Data Zone Standard**.
-3. In der Azure-Resource → **Keys and Endpoint** → Key 1 + Endpoint-URL abholen.
-
-```env
-AZURE_OPENAI_API_KEY=<key>
-AZURE_OPENAI_ENDPOINT=https://<deine-resource>.openai.azure.com
-AZURE_OPENAI_API_VERSION=2024-12-01-preview
-AZURE_OPENAI_DEPLOYMENT=gpt-4.1-mini
-```
-
----
-
-## 3. Azure Speech (STT + TTS — alle Agents)
+## 2. Azure Speech (STT + TTS — alle Agents)
 
 **DSGVO:** Speech-Resource in einer EU-Region anlegen, z. B. `swedencentral`, `germanywestcentral`, `westeurope` oder `francecentral`. Microsoft dokumentiert, dass Azure Speech Daten nicht außerhalb der Region der Speech-Resource speichert oder verarbeitet.
 
 1. Resource anlegen: https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices
-2. Region wählen: z. B. `swedencentral` (passt gut zu Azure OpenAI Sweden Central).
+2. Region wählen: z. B. `germanywestcentral`, `westeurope` oder `swedencentral`.
 3. **Keys and Endpoint** → Key 1 kopieren.
 4. Stimme wählen. Gute deutsche Defaults:
    - `de-DE-SeraphinaMultilingualNeural` (weiblich, modern)
@@ -108,7 +90,7 @@ AZURE_SPEECH_VOICE=de-DE-SeraphinaMultilingualNeural
 
 ---
 
-## 4. Deepgram (optional: STT-Alternative für Agent 01)
+## 3. Deepgram (optional: STT-Latency-Alternative)
 
 **DSGVO:** Für EU-Verarbeitung den Deepgram-EU-Endpoint `https://api.eu.deepgram.com` nutzen. Laut Deepgram-Doku funktionieren bestehende API-Keys auch mit diesem Endpoint.
 
@@ -125,7 +107,7 @@ DEEPGRAM_LANGUAGE=de
 
 ---
 
-## 5. Cartesia (optional: TTS-Alternative)
+## 4. Cartesia (optional: TTS-Alternative)
 
 1. Account: https://cartesia.ai/
 2. [play.cartesia.ai](https://play.cartesia.ai/) → **API Keys → Create**.
@@ -139,7 +121,7 @@ CARTESIA_VOICE_ID=<voice-id>
 
 ---
 
-## 6. ElevenLabs (optional: TTS-Alternative)
+## 5. ElevenLabs (optional: TTS-Alternative)
 
 Beispielstimme: **"Johanna"** (deutsch). Nur als Alternative zum Azure-Speech-Default verwenden.
 
@@ -154,7 +136,7 @@ ELEVEN_VOICE_ID=<voice-id>
 
 ---
 
-## 7. Twilio (Agent 03 — nur auf VPS)
+## 6. Twilio (Agent 03 — nur auf VPS)
 
 Lokal nicht sinnvoll testbar (Twilio muss per SIP zum öffentlich erreichbaren LiveKit verbinden). Kurzfassung:
 
@@ -180,7 +162,7 @@ LIVEKIT_OUTBOUND_TRUNK_ID=ST_xxx
 
 ---
 
-## 8. LiveKit-Keys (lokal generieren)
+## 7. LiveKit-Keys (lokal generieren)
 
 ```bash
 ./scripts/generate-keys.sh

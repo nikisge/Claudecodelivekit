@@ -6,10 +6,9 @@ Dieses Repo ist darauf ausgelegt, nur mit EU-Region-Endpoints oder Zero-Retentio
 
 | Komponente | Provider | DSGVO-Konfiguration |
 |---|---|---|
-| LLM Agent 01 | Google Vertex AI — Gemini 2.5 Flash Lite | `europe-west4` (Niederlande) oder `europe-west1` (Belgien) |
-| LLM Agent 02+03 | Azure OpenAI — GPT-4.1 mini | **„EU Data Zone Standard"**-Deployment, Region `swedencentral` |
-| STT Agent 01 | Deepgram Nova-3 | EU-Endpoint `api.eu.deepgram.com`, DPA/AVV, keine Trainingsnutzung |
-| STT Agent 02+03 | Azure Speech | Speech-Resource in EU-Region, z. B. `swedencentral`, `germanywestcentral`, `westeurope` |
+| LLM Agent 01 | Google Vertex AI — Gemini 2.5 Flash Lite | `europe-west4` (Niederlande) oder unterstützte EU-Region |
+| LLM Agent 02+03 | Google Vertex AI — Gemini 2.5 Flash | `europe-west4` (Niederlande) oder unterstützte EU-Region |
+| STT alle Agents | Azure Speech | Speech-Resource in EU-Region, z. B. `swedencentral`, `germanywestcentral`, `westeurope` |
 | TTS alle Agents | Azure Speech Neural Voices | Speech-Resource in EU-Region, z. B. `de-DE-SeraphinaMultilingualNeural` |
 | Kalender | Google Calendar (Service Account) | Workspace-Account in EU-Region |
 | Telefonie | Twilio Elastic SIP | EU-Region `de1` (Frankfurt) oder `eu1` (Dublin) |
@@ -17,24 +16,11 @@ Dieses Repo ist darauf ausgelegt, nur mit EU-Region-Endpoints oder Zero-Retentio
 
 ## Im Detail
 
-### Azure OpenAI
-
-**⚠️ Default ist NICHT DSGVO-konform.** Wenn du bei Azure einen OpenAI-Resource anlegst, steht das Deployment standardmäßig auf „Global Standard" — das bedeutet, Requests können weltweit geroutet werden.
-
-**So richtig machen:**
-1. Azure Portal → OpenAI Resource anlegen → Region: **Sweden Central**
-2. Im Resource: **Deployments → Create new**
-3. Model: `gpt-4.1-mini`
-4. **Deployment type: „EU Data Zone Standard"** auswählen (nicht „Global Standard")
-5. DPA via Microsoft EU Data Boundary gilt dann
-
-Verifiziere im Azure Portal, dass dein Deployment wirklich „EU Data Zone" zeigt. Alternative neueste Variante ist „Data Zones — EU" je nach UI-Stand bei Microsoft.
-
 ### Google Vertex AI (Gemini)
 
-Vertex AI bietet Data Residency in EU, aber der **Gemini 2.5**-Tenant kann laut Google-Doku in manchen Fällen Daten „global für Inference verarbeiten", während nur Storage in EU bleibt. Lese dazu die aktuelle Google-Dokumentation zu AI Data Residency durch.
+Vertex AI ist der Default-LLM-Stack in diesem Repo. Für Agent 01 nutzen wir `gemini-2.5-flash-lite`, für Tool-Calling in Agent 02/03 `gemini-2.5-flash`.
 
-Für das Tutorial: `europe-west4` setzen und im Video ehrlich adressieren, dass dies der aktuell beste DSGVO-Kompromiss bei Gemini ist, aber keine 100%-EU-Garantie wie bei Azure EU Data Zone.
+Für das Tutorial: `europe-west4` setzen. Google dokumentiert für Vertex AI Data Residency, dass ML Processing in der spezifischen Region oder Multi-Region des Requests stattfindet, sofern Modell und Capability Data Residency unterstützen. Bei Gemini 2.5 Flash/Flash-Lite ist Europa als ML-Processing-Multi-Region dokumentiert.
 
 ### Azure Speech
 
@@ -59,7 +45,7 @@ Gute deutsche Stimmen zum Testen:
 | `de-DE-ConradNeural` | männlich, stabiler Standard |
 | `de-DE-KlarissaNeural` | weiblich, Alternative |
 
-### Deepgram
+### Deepgram als Alternative
 
 Deepgram stellt einen dedizierten EU-Endpoint bereit. URL: `https://api.eu.deepgram.com`. In `.env`:
 
@@ -69,7 +55,7 @@ DEEPGRAM_MODEL=nova-3
 DEEPGRAM_LANGUAGE=de
 ```
 
-Agent 01 nutzt Deepgram bewusst für die Latenz-Demo. Für rein deutsche Gespräche ist `language=de` am stabilsten. Für Code-Switching oder internationale Demos kannst du `DEEPGRAM_LANGUAGE=multi` verwenden; Nova-3 Multilingual unterstützt u. a. Deutsch, Englisch, Französisch, Spanisch, Italienisch, Niederländisch, Portugiesisch, Hindi, Japanisch und Russisch in Echtzeit.
+Der Default-Code nutzt Azure Speech. Deepgram bleibt eine optionale Latenz-Alternative. Für rein deutsche Gespräche ist `language=de` am stabilsten. Für Code-Switching oder internationale Demos kannst du `DEEPGRAM_LANGUAGE=multi` verwenden; Nova-3 Multilingual unterstützt u. a. Deutsch, Englisch, Französisch, Spanisch, Italienisch, Niederländisch, Portugiesisch, Hindi, Japanisch und Russisch in Echtzeit.
 
 Für Produktion: DPA/AVV abschließen und sicherstellen, dass keine Teilnahme am Model Improvement Partnership Program vereinbart ist, wenn Kundendaten nicht fürs Training genutzt werden sollen.
 
@@ -102,7 +88,7 @@ Im Repo dokumentieren wir bewusst **Alternativen**, wenn die Default-Wahl ein Ri
 | Statt | Nimm |
 |---|---|
 | Cartesia / ElevenLabs ohne Enterprise-EU | Azure Speech Neural Voices |
-| Google Vertex AI Gemini (falls Data-Global-Problem) | Azure OpenAI GPT-4.1 mini (EU Data Zone) |
+| Vertex AI Modell in gewählter EU-Region nicht verfügbar | anderes Vertex-Gemini-Modell in unterstützter EU-Region |
 | Deepgram ohne DPA/EU-Endpoint | Azure Speech STT |
 | Google Calendar (ohne Workspace-EU) | Nextcloud Calendar (CalDAV, self-hosted) |
 

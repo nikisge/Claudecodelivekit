@@ -6,21 +6,17 @@ in möglichst wenig Code.
 
 Provider (alle EU-Region / DSGVO-konform):
   STT: Azure Speech (EU-Region)
-  LLM: Azure OpenAI GPT-4.1-mini (Sweden Central, EU Data Zone)
+  LLM: Google Gemini 2.5 Flash Lite via Vertex AI (EU-Region)
   TTS: Azure Speech Neural Voice (EU-Region)
   VAD: Silero (lokal, keine externe API)
   Turn Detection: LiveKit Multilingual Model (lokal)
-
-Alternativen mit niedrigerer Latenz, aber mehr Provider-Setup:
-  STT: Deepgram Nova-3 (EU-Endpoint)
-  LLM: Google Gemini 2.5 Flash Lite via Vertex AI (europe-west4)
 """
 
 import os
 from dotenv import find_dotenv, load_dotenv
 
 from livekit.agents import Agent, AgentSession, JobContext, WorkerOptions, cli
-from livekit.plugins import azure, openai, silero
+from livekit.plugins import azure, google, silero
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
 load_dotenv(find_dotenv(usecwd=True))
@@ -48,11 +44,11 @@ async def entrypoint(ctx: JobContext) -> None:
             speech_region=os.getenv("AZURE_SPEECH_REGION", "swedencentral"),
             language=os.getenv("AZURE_SPEECH_LANGUAGE", "de-DE"),
         ),
-        llm=openai.LLM.with_azure(
-            model=os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4.1-mini"),
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-            api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-            api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2024-12-01-preview"),
+        llm=google.LLM(
+            model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite"),
+            vertexai=True,
+            project=os.getenv("GOOGLE_CLOUD_PROJECT"),
+            location=os.getenv("GOOGLE_CLOUD_LOCATION", "europe-west4"),
         ),
         tts=azure.TTS(
             speech_key=os.getenv("AZURE_SPEECH_KEY"),

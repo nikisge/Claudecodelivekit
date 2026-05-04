@@ -46,6 +46,6 @@ Der Agent stellt 4 Qualifikations-Fragen und ruft am Ende `save_lead` auf. Das E
 
 ## DSGVO
 
-- **Azure OpenAI:** EU Data Zone Standard
+- **Vertex AI:** EU-Region wie `europe-west4` setzen
 - **Azure Speech:** Speech-Resource in EU-Region für STT/TTS; ElevenLabs nur optional mit Enterprise EU Residency + Zero-Retention
 - **Twilio:** DPA abschließen, EU-Rechenzentrum (Frankfurt/Dublin) wählen. Call-Recording ist in diesem Agent standardmäßig aus

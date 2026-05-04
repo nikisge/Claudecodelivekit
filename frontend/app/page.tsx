@@ -24,7 +24,7 @@ const AGENTS: AgentCardData[] = [
     title: 'Simple Latency',
     description:
       'Minimale STT→LLM→TTS-Pipeline. Zeigt das Grundprinzip eines Voice-Agents in ~80 Zeilen Code.',
-    stack: 'Gemini 2.5 Flash Lite · Deepgram EU · Azure Speech',
+    stack: 'Gemini 2.5 Flash Lite · Azure Speech',
   },
   {
     key: 'appointment-booking',
@@ -33,7 +33,7 @@ const AGENTS: AgentCardData[] = [
     title: 'Termin-Assistent',
     description:
       'Bucht, verschiebt und sagt Termine in einem echten Google Kalender ab. Zeigt Multi-Turn-Tool-Calling.',
-    stack: 'Azure OpenAI GPT-4.1 mini · Azure Speech',
+    stack: 'Gemini 2.5 Flash · Azure Speech',
   },
   {
     key: 'outbound-telephony',
@@ -42,7 +42,7 @@ const AGENTS: AgentCardData[] = [
     title: 'Outbound-Anruf',
     description:
       'Formular ausfüllen, der Agent ruft dich per Twilio SIP an und qualifiziert dein Anliegen.',
-    stack: 'Azure OpenAI · Twilio SIP (nur auf VPS)',
+    stack: 'Gemini 2.5 Flash · Twilio SIP (nur auf VPS)',
   },
 ];
 

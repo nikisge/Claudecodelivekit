@@ -34,7 +34,7 @@ uv sync
 uv run python agent.py dev
 ```
 
-## Warum Azure OpenAI GPT-4.1-mini?
+## Warum Gemini 2.5 Flash via Vertex AI?
 
 - Schnelles Tool-Calling (geringere Latenz als GPT-4o, mehr Intelligenz als GPT-3.5)
 - EU Data Zone in Azure Sweden Central → DSGVO-dokumentierbar
@@ -42,6 +42,6 @@ uv run python agent.py dev
 
 ## DSGVO
 
-- **Azure OpenAI:** Deployment muss im Azure Portal als „EU Data Zone Standard" konfiguriert werden, nicht „Global Standard"
+- **Vertex AI:** EU-Region wie `europe-west4` setzen
 - **Azure Speech:** Speech-Resource in EU-Region für STT/TTS; ElevenLabs nur optional mit Enterprise EU Residency + Zero-Retention
 - **Google Calendar:** Daten liegen bei Google. Wenn dein Google Workspace in der EU registriert ist, greift die EU-Data-Residency von Google Workspace. Für volle Kontrolle → Nextcloud Calendar mit CalDAV (out of scope dieses Tutorials)

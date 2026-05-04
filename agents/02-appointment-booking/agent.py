@@ -9,7 +9,7 @@ Demonstriert:
 
 Provider (alle DSGVO-konform):
   STT: Azure Speech (EU-Region)
-  LLM: Azure OpenAI GPT-4.1-mini (Sweden Central, EU Data Zone)
+  LLM: Google Gemini via Vertex AI (EU-Region)
   TTS: Azure Speech Neural Voice (EU-Region)
 """
 
@@ -30,7 +30,7 @@ from livekit.agents import (
     cli,
     function_tool,
 )
-from livekit.plugins import azure, openai, silero
+from livekit.plugins import azure, google, silero
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
 from calendar_client import CalendarClient
@@ -169,11 +169,11 @@ async def entrypoint(ctx: JobContext) -> None:
             speech_region=os.getenv("AZURE_SPEECH_REGION", "swedencentral"),
             language=os.getenv("AZURE_SPEECH_LANGUAGE", "de-DE"),
         ),
-        llm=openai.LLM.with_azure(
-            model=os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4.1-mini"),
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-            api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-            api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2024-12-01-preview"),
+        llm=google.LLM(
+            model=os.getenv("GEMINI_TOOL_MODEL", "gemini-2.5-flash"),
+            vertexai=True,
+            project=os.getenv("GOOGLE_CLOUD_PROJECT"),
+            location=os.getenv("GOOGLE_CLOUD_LOCATION", "europe-west4"),
         ),
         tts=azure.TTS(
             speech_key=os.getenv("AZURE_SPEECH_KEY"),
