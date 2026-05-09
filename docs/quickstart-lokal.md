@@ -40,7 +40,7 @@ GEMINI_TOOL_MODEL=gemini-2.5-flash
 
 # Azure Speech (EU)
 AZURE_SPEECH_KEY=...
-AZURE_SPEECH_REGION=swedencentral
+AZURE_SPEECH_REGION=germanywestcentral
 AZURE_SPEECH_LANGUAGE=de-DE
 AZURE_SPEECH_VOICE=de-DE-SeraphinaMultilingualNeural
 
@@ -67,6 +67,10 @@ open http://localhost:3000
 ```
 
 Du siehst die Agent-Übersicht mit drei Kacheln. Bereite nur den Agent vor, den du zeigen willst, z. B. `./start.sh setup 1`; danach startest und stoppst du ihn direkt im Browser.
+
+Hinweis: Agent 2 und 3 nutzen Silero VAD + Multilingual Turn Detection. Im Docker-Build wird dafür CPU-only PyTorch installiert, damit keine großen CUDA/GPU-Pakete im Image landen. Der erste Build dauert trotzdem deutlich länger als Agent 1.
+
+Latenz-Tipp: Nutze für Azure Speech eine Region nahe an deinem Server und deinen Nutzern, z. B. `germanywestcentral` oder `westeurope` für DACH/EU. Für die schnellste Demo nimm normale Neural Voices wie `de-DE-SeraphinaMultilingualNeural` oder `de-DE-FlorianMultilingualNeural`, nicht die `DragonHD...`-Varianten.
 
 ### 5. Agent 1 starten
 

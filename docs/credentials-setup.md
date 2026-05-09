@@ -73,7 +73,7 @@ GOOGLE_CALENDAR_ID=primary
 **DSGVO:** Speech-Resource in einer EU-Region anlegen, z. B. `swedencentral`, `germanywestcentral`, `westeurope` oder `francecentral`. Microsoft dokumentiert, dass Azure Speech Daten nicht außerhalb der Region der Speech-Resource speichert oder verarbeitet.
 
 1. Resource anlegen: https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices
-2. Region wählen: z. B. `germanywestcentral`, `westeurope` oder `swedencentral`.
+2. Region wählen: z. B. `germanywestcentral` oder `westeurope` für DACH/EU. Wichtig: Key und Region müssen exakt zur gleichen Speech-Resource gehören.
 3. **Keys and Endpoint** → Key 1 kopieren.
 4. Stimme wählen. Gute deutsche Defaults:
    - `de-DE-SeraphinaMultilingualNeural` (weiblich, modern)
@@ -83,10 +83,12 @@ GOOGLE_CALENDAR_ID=primary
 
 ```env
 AZURE_SPEECH_KEY=<key>
-AZURE_SPEECH_REGION=swedencentral
+AZURE_SPEECH_REGION=germanywestcentral
 AZURE_SPEECH_LANGUAGE=de-DE
 AZURE_SPEECH_VOICE=de-DE-SeraphinaMultilingualNeural
 ```
+
+Für Voice-Agent-Latenz sind normale Neural Voices die pragmatische Wahl. `DragonHD...`-Voices klingen sehr gut, sind aber für dieses Tutorial nicht nötig und unterstützen weniger SSML-Features. Wenn du möglichst snappy Gespräche willst, bleib bei `de-DE-SeraphinaMultilingualNeural`, `de-DE-FlorianMultilingualNeural`, `de-DE-KatjaNeural` oder `de-DE-ConradNeural`.
 
 ---
 

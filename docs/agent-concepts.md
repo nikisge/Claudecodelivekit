@@ -39,7 +39,7 @@ Flow:
 3. Python-Code wird ausgeführt, Rückgabe geht zurück an LLM
 4. LLM generiert die Sprach-Antwort an den Nutzer: „Alles klar Max, ich habe den Termin für Freitag 14 Uhr eingetragen."
 
-## Realtime-Models (nicht in diesem Tutorial genutzt, aber gut zu kennen)
+## Realtime-Models
 
 OpenAI Realtime API und Gemini Live API bieten ein **anderes** Modell: statt STT→LLM→TTS-Chain sprechen sie direkt Audio ↔ Audio. Vorteile:
 - Noch niedrigere Latenz
@@ -50,7 +50,7 @@ Nachteile:
 - Meist teurer
 - DSGVO-Situation je nach Anbieter komplizierter
 
-Für Lerzwecke ist die klassische Pipeline klarer, deshalb nutzen wir die in diesem Tutorial.
+Agent 1 nutzt genau diesen Speech-to-Speech-Ansatz mit Gemini Live API. Agent 2 und 3 nutzen bewusst die klassische Pipeline, weil Tool Calling, Transkripte und Debugging dort für das Tutorial besser sichtbar sind.
 
 ## Worker-Pattern (Agent 3)
 
@@ -86,12 +86,14 @@ room.on(RoomEvent.DataReceived, (payload) => {
 });
 ```
 
-## Warum 3 verschiedene LLMs?
+## Warum diese Modellwahl?
 
 | Agent | Ziel | Gewählt | Warum |
 |---|---|---|---|
 | 01 | minimal latency | Gemini 2.5 Flash Native Audio | Speech-to-Speech ohne separaten STT/TTS-Hop |
-| 02 | Tool Calling, strukturierte Args | Azure GPT-4.1 mini | bessere Tool-Intent-Erkennung als Flash Lite |
-| 03 | Gespräch + Tool Calling | Azure GPT-4.1 mini | wie Agent 02 — Qualifikation braucht Intelligenz, Latenz ist im Telefonat weniger kritisch |
+| 02 | Tool Calling, strukturierte Args | Gemini 2.5 Flash via Vertex AI | stärker als Flash-Lite, Thinking im Code deaktiviert |
+| 03 | Gespräch + Tool Calling | Gemini 2.5 Flash via Vertex AI | gleiche Pipeline wie Agent 02, aber über Telefon/SIP |
 
 Im Repo tauschst du den Provider an *einer* Stelle (im `AgentSession(llm=...)`-Call), der Rest bleibt gleich.
+
+Für Agent 2/3 ist Azure STT/TTS oft der größere Latenzblock als Gemini. Deshalb nutzt das Repo normale Azure Neural Voices und empfiehlt eine Azure-Speech-Region nahe am Server. Die HD-Voices sind eher Qualitäts- als Demo-Latenz-Optimierung.

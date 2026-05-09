@@ -119,7 +119,6 @@ services:
       LIVEKIT_URL: ws://host.docker.internal:7880
       AGENT_NAME: outbound-telephony
       GOOGLE_APPLICATION_CREDENTIALS: /secrets/gcp-sa.json
-      AZURE_SPEECH_VOICE: de-DE-FlorianMultilingualNeural
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:

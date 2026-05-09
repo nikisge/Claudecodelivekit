@@ -105,18 +105,19 @@ async def entrypoint(ctx: JobContext) -> None:
         vad=silero.VAD.load(),
         stt=azure.STT(
             speech_key=os.getenv("AZURE_SPEECH_KEY"),
-            speech_region=os.getenv("AZURE_SPEECH_REGION", "swedencentral"),
+            speech_region=os.getenv("AZURE_SPEECH_REGION", "germanywestcentral"),
             language=os.getenv("AZURE_SPEECH_LANGUAGE", "de-DE"),
         ),
         llm=google.LLM(
             model=os.getenv("GEMINI_TOOL_MODEL", "gemini-2.5-flash"),
+            thinking_config={"thinking_budget": 0},
             vertexai=True,
             project=os.getenv("GOOGLE_CLOUD_PROJECT"),
             location=os.getenv("GOOGLE_CLOUD_LOCATION", "europe-west4"),
         ),
         tts=azure.TTS(
             speech_key=os.getenv("AZURE_SPEECH_KEY"),
-            speech_region=os.getenv("AZURE_SPEECH_REGION", "swedencentral"),
+            speech_region=os.getenv("AZURE_SPEECH_REGION", "germanywestcentral"),
             voice=os.getenv("AZURE_SPEECH_VOICE", "de-DE-SeraphinaMultilingualNeural"),
             language=os.getenv("AZURE_SPEECH_LANGUAGE", "de-DE"),
         ),

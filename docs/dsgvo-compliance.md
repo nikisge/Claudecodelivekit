@@ -8,7 +8,7 @@ Dieses Repo ist darauf ausgelegt, nur mit EU-Region-Endpoints oder Zero-Retentio
 |---|---|---|
 | Realtime-Modell Agent 01 | Google Vertex AI — Gemini 2.5 Flash Native Audio | `europe-west4` (Niederlande) oder unterstützte EU-Region |
 | LLM Agent 02+03 | Google Vertex AI — Gemini 2.5 Flash | `europe-west4` (Niederlande) oder unterstützte EU-Region |
-| STT alle Agents | Azure Speech | Speech-Resource in EU-Region, z. B. `swedencentral`, `germanywestcentral`, `westeurope` |
+| STT alle Agents | Azure Speech | Speech-Resource in EU-Region, z. B. `germanywestcentral`, `westeurope`, `swedencentral` |
 | TTS alle Agents | Azure Speech Neural Voices | Speech-Resource in EU-Region, z. B. `de-DE-SeraphinaMultilingualNeural` |
 | Kalender | Google Calendar (Service Account) | Workspace-Account in EU-Region |
 | Telefonie | Twilio Elastic SIP | EU-Region `de1` (Frankfurt) oder `eu1` (Dublin) |
@@ -24,13 +24,13 @@ Für das Tutorial: `europe-west4` setzen. Google dokumentiert für Vertex AI Dat
 
 ### Azure Speech
 
-Azure Speech ist die Default-Wahl in diesem Repo, weil STT und TTS über denselben Microsoft-DPA/EU-Region-Stack laufen können. Lege die Speech-Resource in einer EU-Region an, z. B. `swedencentral`, `germanywestcentral`, `westeurope` oder `francecentral`.
+Azure Speech ist die Default-Wahl in diesem Repo, weil STT und TTS über denselben Microsoft-DPA/EU-Region-Stack laufen können. Lege die Speech-Resource in einer EU-Region nahe am Server an, z. B. `germanywestcentral`, `westeurope`, `swedencentral` oder `francecentral`.
 
 In `.env`:
 
 ```
 AZURE_SPEECH_KEY=<key>
-AZURE_SPEECH_REGION=swedencentral
+AZURE_SPEECH_REGION=germanywestcentral
 AZURE_SPEECH_LANGUAGE=de-DE
 AZURE_SPEECH_VOICE=de-DE-SeraphinaMultilingualNeural
 ```

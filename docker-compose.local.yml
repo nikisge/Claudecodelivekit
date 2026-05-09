@@ -107,6 +107,5 @@ services:
     environment:
       LIVEKIT_URL: ws://livekit-server:7990
       GOOGLE_APPLICATION_CREDENTIALS: /secrets/gcp-sa.json
-      AZURE_SPEECH_VOICE: de-DE-FlorianMultilingualNeural
     volumes:
       - ./secrets/gcp-sa.json:/secrets/gcp-sa.json:ro

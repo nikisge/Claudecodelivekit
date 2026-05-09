@@ -75,6 +75,10 @@ Was die Befehle machen:
 
 Wenn im Browser bei einer Agent-Kachel `missing` oder ein Container-Fehler erscheint, wurde der konkrete Agent noch nicht vorbereitet. Nutze dann `./start.sh setup 1`, `./start.sh setup 2` oder `./start.sh setup 3`.
 
+Hinweis zu Build-Zeit und Image-Größe: Agent 2 und 3 nutzen Silero VAD + Multilingual Turn Detection. Die Dockerfiles installieren dafür CPU-only PyTorch, damit keine CUDA/GPU-Pakete mitgebaut werden. Der erste Build dauert trotzdem deutlich länger als Agent 1.
+
+Latenz-Tipp für Agent 2/3: Gemini 2.5 Flash läuft mit deaktiviertem Thinking. Für Azure Speech nimm eine Speech-Region nahe am Server und normale Neural Voices wie `de-DE-SeraphinaMultilingualNeural` oder `de-DE-FlorianMultilingualNeural`; die `DragonHD...`-Voices sind eher Qualitäts- als Demo-Latenz-Optimierung.
+
 ### Lokal entwickeln
 
 Für normales Testen reicht Docker. Wenn du an einem Agent arbeitest und Hot Reload willst, kannst du den jeweiligen Agent außerhalb von Docker starten:
