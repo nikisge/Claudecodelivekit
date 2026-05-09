@@ -58,7 +58,7 @@ https://console.cloud.google.com/billing/linkedaccount → Billing-Account zuord
 GOOGLE_APPLICATION_CREDENTIALS=/secrets/gcp-sa.json
 GOOGLE_CLOUD_PROJECT=deine-project-id
 GOOGLE_CLOUD_LOCATION=europe-west4
-GEMINI_MODEL=gemini-2.5-flash-lite
+GEMINI_MODEL=gemini-2.5-flash
 GEMINI_TOOL_MODEL=gemini-2.5-flash
 GOOGLE_SERVICE_ACCOUNT_PATH=./secrets/gcp-sa.json
 GOOGLE_CALENDAR_ID=primary

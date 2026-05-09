@@ -53,7 +53,7 @@ Agent 01 nutzt Gemini 2.5 Flash Native Audio über Vertex AI. Wenn du Vertex AI 
    ```
    GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-sa.json
    GOOGLE_CLOUD_LOCATION=europe-west4
-   GEMINI_MODEL=gemini-2.5-flash-lite
+   GEMINI_MODEL=gemini-2.5-flash
    ```
 
 Die gleiche JSON-Datei wird also von beiden Agents genutzt.

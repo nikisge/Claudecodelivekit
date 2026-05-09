@@ -41,8 +41,8 @@ Provider-Setup-Details siehe `docs/credentials-setup.md`.
 Voraussetzungen: Docker Desktop, ein gefülltes `.env`, Provider-Keys und für Agent 1/2 die Google-Service-Account-Datei unter `./secrets/gcp-sa.json`.
 
 ```bash
-git clone <dein-fork>
-cd livekit-voice-agents-de
+git clone https://github.com/nikisge/Claudecodelivekit.git
+cd Claudecodelivekit
 
 ./scripts/generate-keys.sh
 # Danach .env öffnen und Provider-Keys eintragen:
@@ -138,8 +138,8 @@ ufw enable
 
 ```bash
 cd /opt
-git clone <dein-fork> livekit-voice-agents-de
-cd livekit-voice-agents-de
+git clone https://github.com/nikisge/Claudecodelivekit.git
+cd Claudecodelivekit
 ./scripts/generate-keys.sh
 nano .env
 ```
@@ -167,7 +167,7 @@ LIVEKIT_URL=wss://lk-187-124-175-89.sslip.io
 ```bash
 mkdir -p secrets
 # Vom lokalen Rechner:
-scp ~/Downloads/gcp-sa.json root@<vps-ip>:/opt/livekit-voice-agents-de/secrets/gcp-sa.json
+scp ~/Downloads/gcp-sa.json root@<vps-ip>:/opt/Claudecodelivekit/secrets/gcp-sa.json
 ```
 
 5. Infrastruktur und den gewünschten Agent starten:
@@ -226,7 +226,7 @@ TWILIO_PHONE_NUMBER=+491701234567
 5. LiveKit-Outbound-Trunk erzeugen:
 
 ```bash
-cd /opt/livekit-voice-agents-de
+cd /opt/Claudecodelivekit
 python3 -m pip install livekit python-dotenv
 python3 scripts/setup-sip.py
 ```
@@ -275,7 +275,7 @@ Mehr Details stehen in `docs/dsgvo-compliance.md`.
 ## Projekt-Struktur
 
 ```
-livekit-voice-agents-de/
+Claudecodelivekit/
 ├── docker-compose.yml          # VPS-Produktion
 ├── docker-compose.local.yml    # Lokales Docker-Setup
 ├── Caddyfile                   # TLS-Reverse-Proxy

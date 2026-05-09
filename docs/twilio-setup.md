@@ -43,7 +43,7 @@ TWILIO_PHONE_NUMBER=+491701234567   # deine Twilio-Nummer, E.164
 Auf dem VPS:
 
 ```bash
-cd /opt/livekit-voice-agents-de
+cd /opt/Claudecodelivekit
 python3 -m pip install livekit python-dotenv
 python3 scripts/setup-sip.py
 ```

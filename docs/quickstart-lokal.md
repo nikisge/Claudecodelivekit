@@ -18,8 +18,8 @@ Agent 3 (Outbound) funktioniert lokal nur mit ngrok-Umweg — den Teil deployen 
 ### 1. Repo klonen und Keys generieren
 
 ```bash
-git clone <dein-fork> livekit-voice-agents-de
-cd livekit-voice-agents-de
+git clone https://github.com/nikisge/Claudecodelivekit.git
+cd Claudecodelivekit
 ./scripts/generate-keys.sh
 ```
 
@@ -35,7 +35,7 @@ GOOGLE_APPLICATION_CREDENTIALS=./secrets/gcp-sa.json
 GOOGLE_CLOUD_PROJECT=dein-gcp-projekt
 GOOGLE_CLOUD_LOCATION=europe-west4
 
-GEMINI_MODEL=gemini-2.5-flash-lite
+GEMINI_MODEL=gemini-2.5-flash
 GEMINI_TOOL_MODEL=gemini-2.5-flash
 
 # Azure Speech (EU)
@@ -73,29 +73,17 @@ Hinweis: Agent 2 und 3 nutzen Silero VAD + Multilingual Turn Detection. Im Docke
 
 Latenz-Tipp: Nutze für Azure Speech eine Region nahe an deinem Server und deinen Nutzern, z. B. `swedencentral` oder `westeurope` für DACH/EU. Für die schnellste Demo nimm normale Neural Voices wie `de-DE-SeraphinaMultilingualNeural` oder `de-DE-FlorianMultilingualNeural`, nicht die `DragonHD...`-Varianten.
 
-### 5. Agent 1 starten
+### 5. Agent vorbereiten und im Browser starten
 
-In einem **zweiten Terminal**:
-
-```bash
-cd agents/01-simple-latency
-uv sync
-uv run python agent.py dev
-```
-
-Klicke im Browser auf **Simple Latency**, erlaube Mikrofon, klicke **Gespräch starten** → der Agent begrüßt dich.
-
-### 6. Agent 2 starten (separat)
-
-In einem **dritten Terminal**:
+Bereite den Agent vor, den du testen willst:
 
 ```bash
-cd agents/02-appointment-booking
-uv sync
-uv run python agent.py dev
+./start.sh setup 1   # Simple Latency
+./start.sh setup 2   # Termin-Assistent
+./start.sh setup 3   # Outbound-Agent
 ```
 
-Im Browser auf **Termin-Assistent** klicken. Sprich: „Ich möchte am Freitag um 14 Uhr einen Termin buchen, mein Name ist Max Mustermann." Der Agent antwortet, ruft `list_free_slots` und `book_appointment` auf, und der Termin erscheint im konfigurierten Google Kalender.
+Danach im Browser auf die passende Kachel klicken und den Agent über den Start-Button starten. Agent 1 begrüßt dich direkt. Bei Agent 2 kannst du z. B. sagen: „Ich möchte am Freitag um 14 Uhr einen Termin buchen, mein Name ist Max Mustermann." Der Agent ruft `list_free_slots` und `book_appointment` auf, und der Termin erscheint im konfigurierten Google Kalender.
 
 ## Troubleshooting
 

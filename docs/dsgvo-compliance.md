@@ -18,7 +18,7 @@ Dieses Repo ist darauf ausgelegt, nur mit EU-Region-Endpoints oder Zero-Retentio
 
 ### Google Vertex AI (Gemini)
 
-Vertex AI ist der Default-LLM-Stack in diesem Repo. Für Agent 01 nutzen wir `gemini-2.5-flash-lite`, für Tool-Calling in Agent 02/03 `gemini-2.5-flash`.
+Vertex AI ist der Default-LLM-Stack in diesem Repo. Agent 01 nutzt `gemini-live-2.5-flash-native-audio`, für Tool-Calling in Agent 02/03 nutzen wir `gemini-2.5-flash`.
 
 Für das Tutorial: `europe-west4` setzen. Google dokumentiert für Vertex AI Data Residency, dass ML Processing in der spezifischen Region oder Multi-Region des Requests stattfindet, sofern Modell und Capability Data Residency unterstützen. Bei Gemini 2.5 Flash/Flash-Lite ist Europa als ML-Processing-Multi-Region dokumentiert.
 

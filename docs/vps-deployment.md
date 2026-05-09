@@ -45,8 +45,8 @@ ufw enable
 
 ```bash
 cd /opt
-git clone <dein-fork> livekit-voice-agents-de
-cd livekit-voice-agents-de
+git clone https://github.com/nikisge/Claudecodelivekit.git
+cd Claudecodelivekit
 ./scripts/generate-keys.sh
 nano .env
 ```
@@ -64,7 +64,7 @@ LIVEKIT_URL=wss://lk.meine-domain.de
 
 Vom Mac aus:
 ```bash
-scp ~/Downloads/gcp-sa.json root@<vps-ip>:/opt/livekit-voice-agents-de/secrets/
+scp ~/Downloads/gcp-sa.json root@<vps-ip>:/opt/Claudecodelivekit/secrets/
 ```
 
 In `.env`:
