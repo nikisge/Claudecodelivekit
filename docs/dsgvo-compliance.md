@@ -33,6 +33,7 @@ AZURE_SPEECH_KEY=<key>
 AZURE_SPEECH_REGION=swedencentral
 AZURE_SPEECH_LANGUAGE=de-DE
 AZURE_SPEECH_VOICE=de-DE-SeraphinaMultilingualNeural
+AZURE_SPEECH_VOICE_AGENT_03=de-DE-FlorianMultilingualNeural
 ```
 
 Gute deutsche Stimmen zum Testen:

@@ -118,7 +118,10 @@ async def entrypoint(ctx: JobContext) -> None:
         tts=azure.TTS(
             speech_key=os.getenv("AZURE_SPEECH_KEY"),
             speech_region=os.getenv("AZURE_SPEECH_REGION", "swedencentral"),
-            voice=os.getenv("AZURE_SPEECH_VOICE", "de-DE-SeraphinaMultilingualNeural"),
+            voice=os.getenv(
+                "AZURE_SPEECH_VOICE_AGENT_03",
+                os.getenv("AZURE_SPEECH_VOICE", "de-DE-FlorianMultilingualNeural"),
+            ),
             language=os.getenv("AZURE_SPEECH_LANGUAGE", "de-DE"),
         ),
         turn_detection=MultilingualModel(),

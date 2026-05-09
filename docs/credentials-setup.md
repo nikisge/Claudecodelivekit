@@ -86,9 +86,10 @@ AZURE_SPEECH_KEY=<key>
 AZURE_SPEECH_REGION=swedencentral
 AZURE_SPEECH_LANGUAGE=de-DE
 AZURE_SPEECH_VOICE=de-DE-SeraphinaMultilingualNeural
+AZURE_SPEECH_VOICE_AGENT_03=de-DE-FlorianMultilingualNeural
 ```
 
-Für Voice-Agent-Latenz sind normale Neural Voices die pragmatische Wahl. `DragonHD...`-Voices klingen sehr gut, sind aber für dieses Tutorial nicht nötig und unterstützen weniger SSML-Features. Wenn du möglichst snappy Gespräche willst, bleib bei `de-DE-SeraphinaMultilingualNeural`, `de-DE-FlorianMultilingualNeural`, `de-DE-KatjaNeural` oder `de-DE-ConradNeural`.
+Für Voice-Agent-Latenz sind normale Neural Voices die pragmatische Wahl. `DragonHD...`-Voices klingen sehr gut, sind aber für dieses Tutorial nicht nötig und unterstützen weniger SSML-Features. Wenn du möglichst snappy Gespräche willst, bleib bei `de-DE-SeraphinaMultilingualNeural`, `de-DE-FlorianMultilingualNeural`, `de-DE-KatjaNeural` oder `de-DE-ConradNeural`. Agent 03 nutzt optional `AZURE_SPEECH_VOICE_AGENT_03`, damit der Outbound-Agent eine eigene männliche Stimme haben kann.
 
 ---
 
